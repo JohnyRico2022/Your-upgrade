@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/habitsFragment"
+        android:icon="@drawable/ic_checklist_24"
+        android:title="Задачи" />
+
+    <item
+        android:id="@+id/userFragment"
+        android:icon="@drawable/ic_person_24"
+        android:title="Профиль" />
+
+    <item
+        android:id="@+id/historyFragment"
+        android:icon="@drawable/ic_calendar_24"
+        android:title="История" />
+
+    <item
+        android:id="@+id/settingsFragment"
+        android:icon="@drawable/ic_settings_24"
+        android:title="Настройки" />
+
+</menu>

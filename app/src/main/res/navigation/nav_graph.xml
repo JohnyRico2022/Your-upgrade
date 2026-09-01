@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/habitsFragment">
+
+    <fragment
+        android:id="@+id/habitsFragment"
+        android:name="ru.nikita.yourupgrade.fragments.HabitsFragment"
+        android:label="Привычки" />
+
+    <fragment
+        android:id="@+id/userFragment"
+        android:name="ru.nikita.yourupgrade.fragments.UserFragment"
+        android:label="Профиль" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="ru.nikita.yourupgrade.fragments.HistoryFragment"
+        android:label="История" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="ru.nikita.yourupgrade.fragments.SettingsFragment"
+        android:label="Настройки" />
+
+</navigation>

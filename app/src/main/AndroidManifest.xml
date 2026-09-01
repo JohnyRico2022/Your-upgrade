@@ -12,10 +12,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.YourUpgrade">
         <activity
-            android:name=".GreetingActivity"
+            android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".GreetingActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
