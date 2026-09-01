@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import ru.nikita.yourupgrade.databinding.ActivityMainBinding
+import ru.nikita.yourupgrade.util.PreferencesManager
 
 class MainActivity : AppCompatActivity() {
 

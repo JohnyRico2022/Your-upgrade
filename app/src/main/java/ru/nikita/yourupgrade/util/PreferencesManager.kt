@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade
+package ru.nikita.yourupgrade.util
 
 import android.content.Context
 import android.content.SharedPreferences

@@ -1,15 +1,15 @@
-package ru.nikita.yourupgrade.fragments
+package ru.nikita.yourupgrade.ui.history
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import ru.nikita.yourupgrade.databinding.FragmentHabitsBinding
+import ru.nikita.yourupgrade.databinding.FragmentHistoryBinding
 
-class HabitsFragment : Fragment() {
+class HistoryFragment : Fragment() {
 
-    private var _binding: FragmentHabitsBinding? = null
+    private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
 
     override fun onCreateView(
@@ -17,13 +17,13 @@ class HabitsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHabitsBinding.inflate(inflater, container, false)
+        _binding = FragmentHistoryBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.tvPlaceholder.text = "Здесь будут привычки на сегодня"
+        binding.tvPlaceholder.text = "История"
     }
 
     override fun onDestroyView() {

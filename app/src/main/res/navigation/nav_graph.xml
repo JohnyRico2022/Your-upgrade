@@ -7,22 +7,22 @@
 
     <fragment
         android:id="@+id/habitsFragment"
-        android:name="ru.nikita.yourupgrade.fragments.HabitsFragment"
+        android:name="ru.nikita.yourupgrade.ui.habits.HabitsFragment"
         android:label="Привычки" />
 
     <fragment
         android:id="@+id/userFragment"
-        android:name="ru.nikita.yourupgrade.fragments.UserFragment"
+        android:name="ru.nikita.yourupgrade.ui.user.UserFragment"
         android:label="Профиль" />
 
     <fragment
         android:id="@+id/historyFragment"
-        android:name="ru.nikita.yourupgrade.fragments.HistoryFragment"
+        android:name="ru.nikita.yourupgrade.ui.history.HistoryFragment"
         android:label="История" />
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="ru.nikita.yourupgrade.fragments.SettingsFragment"
+        android:name="ru.nikita.yourupgrade.ui.settings.SettingsFragment"
         android:label="Настройки" />
 
 </navigation>

@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.fragments
+package ru.nikita.yourupgrade.ui.settings
 
 import android.os.Bundle
 import android.view.LayoutInflater

@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import ru.nikita.yourupgrade.databinding.ActivityGreetingBinding
+import ru.nikita.yourupgrade.util.PreferencesManager
 
 class GreetingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGreetingBinding
