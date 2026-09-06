@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Название привычки -->
+        <TextView
+            android:id="@+id/tvHabitName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Отжимания"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Категория и тип -->
+        <TextView
+            android:id="@+id/tvCategoryInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="💪 Сила • Ежедневно"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- Цель -->
+        <TextView
+            android:id="@+id/tvTargetInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Цель: 20"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+        <!-- Разделитель -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="24dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Заголовок недели -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Текущая неделя"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- 🆕 Горизонтальный список дней -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvWeekDays"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:clipToPadding="false" />
+
+        <!-- Разделитель -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="24dp"
+            android:background="?android:attr/listDivider" />
+
+        <!-- Статистика за неделю -->
+        <TextView
+            android:id="@+id/tvWeekSummary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Выполнено: 5 из 7 дней"
+            android:textSize="14sp"
+            android:textColor="?android:attr/textColorSecondary" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -78,7 +78,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:checked="true"
-            android:text="Галочка" />
+            android:text="Отметка" />
 
         <RadioButton
             android:id="@+id/rbMeasurable"

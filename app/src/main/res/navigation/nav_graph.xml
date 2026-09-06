@@ -11,6 +11,16 @@
         android:label="Привычки" />
 
     <fragment
+        android:id="@+id/habitDetailFragment"
+        android:name="ru.nikita.yourupgrade.ui.habits.HabitDetailFragment"
+        android:label="Детали привычки">
+        <argument
+            android:name="habitId"
+            app:argType="long"
+            android:defaultValue="-1L" />
+    </fragment>
+
+    <fragment
         android:id="@+id/userFragment"
         android:name="ru.nikita.yourupgrade.ui.user.UserFragment"
         android:label="Профиль" />

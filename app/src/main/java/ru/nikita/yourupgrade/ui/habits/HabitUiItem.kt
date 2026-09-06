@@ -10,18 +10,19 @@ data class HabitUiItem(
     val categoryEmoji: String,
     val type: HabitType,
     val completionMode: CompletionMode,
-    val targetValue: Float
+    val targetValue: Float,
+    val isDoneToday: Boolean = false,
+    val completedValue: Float = 0f  // 🆕 для измеримых
 ) {
     val targetLabel: String
         get() = when (completionMode) {
-            CompletionMode.MEASURABLE -> {
-                val value = if (targetValue == targetValue.toLong().toFloat()) {
-                    targetValue.toLong().toString()
-                } else {
-                    targetValue.toString()
-                }
-                "Цель: $value"
-            }
+            CompletionMode.MEASURABLE -> "Цель: ${targetValue.toLong()}"
             CompletionMode.CHECKABLE -> "Отмечаемое"
         }
+
+    val progressLabel: String
+        get() = "${completedValue.toLong()}/${targetValue.toLong()}"
+
+    val isFullyDone: Boolean
+        get() = completedValue >= targetValue
 }

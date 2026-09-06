@@ -30,4 +30,7 @@ interface HabitDao {
 
     @Query("UPDATE habits SET isActive = 0 WHERE id = :id")
     suspend fun deleteHabit(id: Long)
+
+    @Query("SELECT * FROM habits WHERE id = :id")
+    fun getHabitByIdFlow(id: Long): Flow<HabitEntity?>
 }

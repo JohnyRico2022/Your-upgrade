@@ -3,13 +3,16 @@ package ru.nikita.yourupgrade.data.repository
 import kotlinx.coroutines.flow.Flow
 import ru.nikita.yourupgrade.data.local.dao.CategoryDao
 import ru.nikita.yourupgrade.data.local.dao.HabitDao
+import ru.nikita.yourupgrade.data.local.dao.HabitLogDao
 import ru.nikita.yourupgrade.data.local.entity.HabitEntity
+import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.model.HabitType
 
 class HabitRepository(
     private val habitDao: HabitDao,
-    private val categoryDao: CategoryDao
+    private val categoryDao: CategoryDao,
+    private val habitLogDao: HabitLogDao
 ) {
 
     fun getDailyHabits(): Flow<List<HabitEntity>> =
@@ -29,4 +32,34 @@ class HabitRepository(
 
     suspend fun getCategoryById(id: Long): SkillCategoryEntity? =
         categoryDao.getCategoryById(id)
+
+    fun getLogsForDate(date: String): Flow<List<HabitLogEntry>> =
+        habitLogDao.getLogsForDate(date)
+
+    suspend fun getLogForHabitAndDate(habitId: Long, date: String): HabitLogEntry? =
+        habitLogDao.getLogForHabitAndDate(habitId, date)
+
+    suspend fun markHabitDone(habitId: Long, date: String) {
+        habitLogDao.insertLog(
+            HabitLogEntry(habitId = habitId, date = date)
+        )
+    }
+
+    suspend fun unmarkHabit(habitId: Long, date: String) {
+        habitLogDao.deleteLogByHabitAndDate(habitId, date)
+    }
+
+    suspend fun insertLog(entry: HabitLogEntry) {
+        habitLogDao.insertLog(entry)
+    }
+
+    fun getLogsForHabitInRange(
+        habitId: Long,
+        startDate: String,
+        endDate: String
+    ): Flow<List<HabitLogEntry>> =
+        habitLogDao.getLogsForHabitInRange(habitId, startDate, endDate)
+
+    suspend fun getHabitById(id: Long): HabitEntity? =
+        habitDao.getHabitById(id)
 }

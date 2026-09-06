@@ -12,9 +12,17 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import nl.dionsegijn.konfetti.core.Party
+import nl.dionsegijn.konfetti.core.Position
+import nl.dionsegijn.konfetti.core.emitter.Emitter
 import ru.nikita.yourupgrade.data.local.entity.HabitEntity
+import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
+import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.databinding.FragmentHabitsBinding
+import java.util.concurrent.TimeUnit
+import androidx.navigation.fragment.findNavController
+import ru.nikita.yourupgrade.R  // ← проверьте импорт!
 
 class HabitsFragment : Fragment() {
 
@@ -44,12 +52,42 @@ class HabitsFragment : Fragment() {
 
     private fun setupAdapters() {
         dailyAdapter = HabitAdapter(
-            onItemClick = { /* TODO: редактирование */ },
-            onDeleteClick = { viewModel.deleteHabit(it.id) }
+            onItemClick = { habit ->
+                // 🎯 Переход на детали — используем ID destination напрямую
+                val bundle = Bundle().apply {
+                    putLong("habitId", habit.id)
+                }
+                findNavController().navigate(
+                    R.id.habitDetailFragment,
+                    bundle
+                )
+            },
+            onDeleteClick = { viewModel.deleteHabit(it.id) },
+            onMarkDone = { habit ->
+                viewModel.toggleHabitCompletion(habit.id)
+                launchConfetti()  // 🆕 Конфетти при отметке!
+            },
+            onUnmarkDone = { habit ->
+                viewModel.toggleHabitCompletion(habit.id)
+                // Без конфетти при снятии
+            },
+            onProgressClick = { habit -> showInputValueDialog(habit) }
         )
         weeklyAdapter = HabitAdapter(
-            onItemClick = { /* TODO: редактирование */ },
-            onDeleteClick = { viewModel.deleteHabit(it.id) }
+            onItemClick = { habit ->
+                // 🆕 Переход на экран деталей
+                val bundle = Bundle().apply {
+                    putLong("habitId", habit.id)
+                }
+                findNavController().navigate(
+                    R.id.habitDetailFragment,
+                    bundle
+                )
+            },
+            onDeleteClick = { viewModel.deleteHabit(it.id) },
+            onMarkDone = { /* для еженедельных позже */ },
+            onUnmarkDone = { /* для еженедельных позже */ },
+            onProgressClick = { /* для еженедельных позже */ }
         )
 
         binding.rvDailyHabits.layoutManager = LinearLayoutManager(requireContext())
@@ -57,6 +95,38 @@ class HabitsFragment : Fragment() {
 
         binding.rvWeeklyHabits.layoutManager = LinearLayoutManager(requireContext())
         binding.rvWeeklyHabits.adapter = weeklyAdapter
+    }
+
+    // 🆕 Конфетти!
+    private fun launchConfetti() {
+        val party = Party(
+            speed = 0f,
+            maxSpeed = 30f,
+            damping = 0.9f,
+            spread = 360,
+            colors = listOf(0xfce18a, 0xff726d, 0xf4306d, 0xb48def, 0x4CAF50),
+            emitter = Emitter(duration = 200, TimeUnit.MILLISECONDS).max(80),
+            position = Position.Relative(
+                x = 0.5,
+                y = 0.3
+            )
+        )
+
+        binding.konfettiView.start(party)
+    }
+
+
+    private fun showInputValueDialog(habit: HabitUiItem) {
+        val dialog = InputValueDialogFragment().apply {
+            this.habitName = habit.name
+            this.targetValue = habit.targetValue
+            this.currentValue = habit.completedValue
+
+            this.onValueEntered = { value ->
+                viewModel.saveMeasurableValue(habit.id, value)
+            }
+        }
+        dialog.show(childFragmentManager, "input_value")
     }
 
     private fun setupToggleGroup() {
@@ -101,42 +171,53 @@ class HabitsFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
 
-                // Daily habits
                 launch {
-                    combine(viewModel.dailyHabits, viewModel.categories, ::toUiItems)
-                        .collect { uiItems ->
-                            dailyAdapter.submitList(uiItems)
-                            binding.tvEmptyDaily.visibility =
-                                if (uiItems.isEmpty()) View.VISIBLE else View.GONE
-                            if (binding.btnDaily.isChecked && uiItems.isNotEmpty()) {
-                                binding.tvEmptyDaily.visibility = View.GONE
-                            }
-                        }
+                    combine(
+                        viewModel.dailyHabits,
+                        viewModel.categories,
+                        viewModel.logsForDate,
+                        ::toUiItemsWithStatus
+                    ).collect { uiItems ->
+                        dailyAdapter.submitList(uiItems)
+                        binding.tvEmptyDaily.visibility =
+                            if (uiItems.isEmpty()) View.VISIBLE else View.GONE
+                    }
                 }
 
-                // Weekly habits
                 launch {
-                    combine(viewModel.weeklyHabits, viewModel.categories, ::toUiItems)
-                        .collect { uiItems ->
-                            weeklyAdapter.submitList(uiItems)
-                            binding.tvEmptyWeekly.visibility =
-                                if (uiItems.isEmpty()) View.VISIBLE else View.GONE
-                            if (binding.btnWeekly.isChecked && uiItems.isNotEmpty()) {
-                                binding.tvEmptyWeekly.visibility = View.GONE
-                            }
-                        }
+                    combine(
+                        viewModel.weeklyHabits,
+                        viewModel.categories,
+                        viewModel.logsForDate,
+                        ::toUiItemsWithStatus
+                    ).collect { uiItems ->
+                        weeklyAdapter.submitList(uiItems)
+                        binding.tvEmptyWeekly.visibility =
+                            if (uiItems.isEmpty()) View.VISIBLE else View.GONE
+                    }
                 }
             }
         }
     }
 
-    private fun toUiItems(
+    private fun toUiItemsWithStatus(
         habits: List<HabitEntity>,
-        categories: List<SkillCategoryEntity>
+        categories: List<SkillCategoryEntity>,
+        logs: List<HabitLogEntry>
     ): List<HabitUiItem> {
         val categoryMap = categories.associateBy { it.id }
+        val logMap = logs.associateBy { it.habitId }
+
         return habits.map { habit ->
             val category = categoryMap[habit.categoryId]
+            val log = logMap[habit.id]
+
+            val isDone = log != null
+            val completedValue = when (habit.completionMode) {
+                CompletionMode.CHECKABLE -> if (isDone) 1f else 0f
+                CompletionMode.MEASURABLE -> log?.completedValue ?: 0f
+            }
+
             HabitUiItem(
                 id = habit.id,
                 name = habit.name,
@@ -144,9 +225,11 @@ class HabitsFragment : Fragment() {
                 categoryEmoji = category?.iconEmoji ?: "📌",
                 type = habit.type,
                 completionMode = habit.completionMode,
-                targetValue = habit.targetValue
+                targetValue = habit.targetValue,
+                isDoneToday = isDone,
+                completedValue = completedValue
             )
-        } as List<HabitUiItem>
+        }
     }
 
     override fun onDestroyView() {
