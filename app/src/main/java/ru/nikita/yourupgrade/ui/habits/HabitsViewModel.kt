@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import ru.nikita.yourupgrade.data.calculator.PointsCalculator
 import ru.nikita.yourupgrade.data.local.AppDatabase
 import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
@@ -16,6 +17,7 @@ import ru.nikita.yourupgrade.data.repository.HabitRepository
 import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.HabitType
+import ru.nikita.yourupgrade.data.model.LogStatus
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -53,7 +55,14 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
             if (existingLog != null) {
                 repository.unmarkHabit(habitId, dateStr)
             } else {
-                repository.markHabitDone(habitId, dateStr)
+                // 🆕 Получаем привычку чтобы узнать её тип
+                val habit = repository.getHabitById(habitId) ?: return@launch
+                val points = PointsCalculator.calculatePoints(
+                    habit.completionMode,
+                    completedValue = 1f,
+                    targetValue = habit.targetValue
+                )
+                repository.markHabitDone(habitId, dateStr, points)
             }
         }
     }
@@ -64,22 +73,36 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
             val dateStr = _selectedDate.value.format(dateFormatter)
 
             if (value <= 0f) {
-                // Если ввели 0 — удаляем запись
                 repository.unmarkHabit(habitId, dateStr)
+                return@launch
+            }
+
+            val habit = repository.getHabitById(habitId) ?: return@launch
+            val points = PointsCalculator.calculatePoints(
+                habit.completionMode,
+                completedValue = value,
+                targetValue = habit.targetValue
+            )
+
+            // 🆕 Проверяем, есть ли уже запись за сегодня
+            val existingLog = repository.getLogForHabitAndDate(habitId, dateStr)
+
+            if (existingLog != null) {
+                // 🆕 Обновляем существующую запись
+                repository.updateLog(habitId, dateStr, value, points)
             } else {
-                // Иначе создаём/обновляем запись
+                // Создаём новую
                 val log = HabitLogEntry(
                     habitId = habitId,
                     date = dateStr,
                     completedValue = value,
-                    earnedPoints = 1f,  // пока фиксированно, формулы в v0.3
-                    status = ru.nikita.yourupgrade.data.model.LogStatus.DONE
+                    earnedPoints = points,
+                    status = LogStatus.DONE
                 )
                 repository.insertLog(log)
             }
         }
     }
-
 
     fun addHabit(
         name: String,

@@ -8,6 +8,7 @@ import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.model.HabitType
+import ru.nikita.yourupgrade.data.model.LogStatus
 
 class HabitRepository(
     private val habitDao: HabitDao,
@@ -39,14 +40,34 @@ class HabitRepository(
     suspend fun getLogForHabitAndDate(habitId: Long, date: String): HabitLogEntry? =
         habitLogDao.getLogForHabitAndDate(habitId, date)
 
-    suspend fun markHabitDone(habitId: Long, date: String) {
+    suspend fun markHabitDone(habitId: Long, date: String, points: Float = 1f) {
         habitLogDao.insertLog(
-            HabitLogEntry(habitId = habitId, date = date)
+            HabitLogEntry(
+                habitId = habitId,
+                date = date,
+                completedValue = 1f,
+                earnedPoints = points,
+                status = LogStatus.DONE
+            )
         )
     }
 
+    fun getAllLogs(): Flow<List<HabitLogEntry>> =
+        habitLogDao.getAllLogs()
+
+    fun getActiveHabits(): Flow<List<HabitEntity>> =
+        habitDao.getActiveHabits()
+
     suspend fun unmarkHabit(habitId: Long, date: String) {
         habitLogDao.deleteLogByHabitAndDate(habitId, date)
+    }
+
+    suspend fun updateLog(habitId: Long, date: String, value: Float, points: Float) {
+        habitLogDao.updateLog(habitId, date, value, points)
+    }
+
+    suspend fun updateHabit(habit: HabitEntity) {
+        habitDao.updateHabit(habit)
     }
 
     suspend fun insertLog(entry: HabitLogEntry) {

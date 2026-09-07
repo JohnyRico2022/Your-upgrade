@@ -74,4 +74,15 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
             )
         }
     }
+
+    // 🆕 Метод переименования
+    fun renameHabit(newName: String) {
+        viewModelScope.launch {
+            val habit = habit.value ?: return@launch
+            val updated = habit.copy(name = newName)
+            repository.updateHabit(updated)
+        }
+    }
+
+
 }

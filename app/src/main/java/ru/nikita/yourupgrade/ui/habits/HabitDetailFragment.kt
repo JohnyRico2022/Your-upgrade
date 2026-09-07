@@ -1,9 +1,13 @@
 package ru.nikita.yourupgrade.ui.habits
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.PopupMenu
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -68,6 +72,11 @@ class HabitDetailFragment : Fragment() {
                         // Заголовок
                         binding.tvHabitName.text = habit.name
 
+                        binding.btnMenu.setOnClickListener {
+                            showHabitMenu()
+                        }
+
+
                         // Категория (пока без запроса категории, просто тип)
                         val typeLabel = if (habit.type == HabitType.DAILY) "Ежедневно" else "Еженедельно"
                         binding.tvCategoryInfo.text = typeLabel
@@ -89,6 +98,53 @@ class HabitDetailFragment : Fragment() {
                 }.collect { }
             }
         }
+    }
+
+    // 🆕 Метод показа меню
+    private fun showHabitMenu() {
+        val popup = PopupMenu(requireContext(), binding.btnMenu)
+        popup.menu.add(0, 1, 0, "Переименовать")
+        popup.menu.add(0, 2, 1, "Удалить")
+
+        popup.setOnMenuItemClickListener { menuItem ->
+            when (menuItem.itemId) {
+                1 -> {
+                    showRenameDialog()
+                    true
+                }
+                2 -> {
+                    // Пока не реализуем
+                    Toast.makeText(requireContext(), "Скоро будет", Toast.LENGTH_SHORT).show()
+                    true
+                }
+                else -> false
+            }
+        }
+
+        popup.show()
+    }
+
+    // 🆕 Диалог переименования
+    private fun showRenameDialog() {
+        val currentName = binding.tvHabitName.text.toString()
+
+        val editText = EditText(requireContext()).apply {
+            setText(currentName)
+            hint = "Новое название"
+            setPadding(48, 32, 48, 16)
+        }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Переименовать привычку")
+            .setView(editText)
+            .setPositiveButton("Сохранить") { _, _ ->
+                val newName = editText.text.toString().trim()
+                if (newName.isNotEmpty()) {
+                    viewModel.renameHabit(newName)
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
     }
 
     override fun onDestroyView() {

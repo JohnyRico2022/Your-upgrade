@@ -208,7 +208,7 @@ class HabitsFragment : Fragment() {
         val categoryMap = categories.associateBy { it.id }
         val logMap = logs.associateBy { it.habitId }
 
-        return habits.map { habit ->
+        val items = habits.map { habit ->
             val category = categoryMap[habit.categoryId]
             val log = logMap[habit.id]
 
@@ -230,6 +230,11 @@ class HabitsFragment : Fragment() {
                 completedValue = completedValue
             )
         }
+
+        return items.sortedWith(
+            compareBy<HabitUiItem> { it.isFullyDone }
+                .thenBy { it.name.lowercase() }
+        )
     }
 
     override fun onDestroyView() {

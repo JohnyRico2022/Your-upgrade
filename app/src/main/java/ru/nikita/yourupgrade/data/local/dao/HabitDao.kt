@@ -12,8 +12,7 @@ import ru.nikita.yourupgrade.data.model.HabitType
 @Dao
 interface HabitDao {
 
-    // 🆕 Отдельные запросы для ежедневных и еженедельных
-    @Query("SELECT * FROM habits WHERE isActive = 1 AND type = :type ORDER BY createdAt DESC")
+    @Query("SELECT * FROM habits WHERE isActive = 1 AND type = :type ORDER BY name COLLATE NOCASE ASC")
     fun getActiveHabitsByType(type: HabitType): Flow<List<HabitEntity>>
 
     @Query("SELECT * FROM habits WHERE isActive = 1 ORDER BY createdAt DESC")

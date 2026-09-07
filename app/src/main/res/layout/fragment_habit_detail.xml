@@ -12,13 +12,30 @@
         android:padding="24dp">
 
         <!-- Название привычки -->
-        <TextView
-            android:id="@+id/tvHabitName"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Отжимания"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvHabitName"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Отжимания"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- 🆕 Кнопка меню -->
+            <ImageButton
+                android:id="@+id/btnMenu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_vert_24" />
+
+        </LinearLayout>
 
         <!-- Категория и тип -->
         <TextView
