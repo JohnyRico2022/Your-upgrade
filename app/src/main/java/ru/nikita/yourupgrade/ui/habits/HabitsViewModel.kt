@@ -123,7 +123,6 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-
     fun deleteHabit(id: Long) {
         viewModelScope.launch {
             repository.deleteHabit(id)

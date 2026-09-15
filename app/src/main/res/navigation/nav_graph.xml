@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<navigation
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
     app:startDestination="@id/habitsFragment">
@@ -16,9 +15,14 @@
         android:label="Детали привычки">
         <argument
             android:name="habitId"
-            app:argType="long"
-            android:defaultValue="-1L" />
+            android:defaultValue="-1L"
+            app:argType="long" />
     </fragment>
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="ru.nikita.yourupgrade.ui.history.HistoryFragment"
+        android:label="История" />
 
     <fragment
         android:id="@+id/userFragment"
@@ -26,9 +30,9 @@
         android:label="Профиль" />
 
     <fragment
-        android:id="@+id/historyFragment"
-        android:name="ru.nikita.yourupgrade.ui.history.HistoryFragment"
-        android:label="История" />
+        android:id="@+id/rewardsFragment"
+        android:name="ru.nikita.yourupgrade.ui.rewards.RewardsFragment"
+        android:label="Награды" />
 
     <fragment
         android:id="@+id/settingsFragment"

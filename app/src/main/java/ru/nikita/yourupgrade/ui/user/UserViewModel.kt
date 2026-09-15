@@ -1,12 +1,14 @@
 package ru.nikita.yourupgrade.ui.user
 
-
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import ru.nikita.yourupgrade.data.calculator.PointsCalculator
 import ru.nikita.yourupgrade.data.local.AppDatabase
+import ru.nikita.yourupgrade.data.local.entity.HabitEntity
+import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
+import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.repository.HabitRepository
 import ru.nikita.yourupgrade.util.PreferencesManager
 import java.time.LocalDate
@@ -37,9 +39,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun buildUiState(
-        categories: List<ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity>,
-        logs: List<ru.nikita.yourupgrade.data.local.entity.HabitLogEntry>,
-        habits: List<ru.nikita.yourupgrade.data.local.entity.HabitEntity>
+        categories: List<SkillCategoryEntity>,
+        logs: List<HabitLogEntry>,
+        habits: List<HabitEntity>
     ): UserUiState {
         // 1. Считаем баллы по каждой категории
         val categoryMap = categories.associateBy { it.id }
@@ -56,31 +58,58 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             pointsByCategory[habit.categoryId] = current + log.earnedPoints
         }
 
+        // 🆕 Получаем очки за ачивки
+      //  val achievementPoints = db.achievementDao().getTotalAchievementPoints()?.toFloat() ?
+
+        // 2. Общий прогресс
+       // val totalPoints = (pointsByCategory.values.sum() + achievementPoints).coerceAtLeast(0f)
+       // val level = PointsCalculator.getLevel(totalPoints)
+
         // 2. Общий прогресс
         val totalPoints = pointsByCategory.values.sum()
         val level = PointsCalculator.getLevel(totalPoints)
-        val levelMin = PointsCalculator.getLevelMinPoints(level)
-        val levelMax = PointsCalculator.getLevelMaxPoints(level)
+//        val levelMin = PointsCalculator.getLevelMinPoints(level)
+//        val levelMax = PointsCalculator.getLevelMaxPoints(level)
 
-        val progress = if (levelMax > levelMin) {
-            ((totalPoints - levelMin) / (levelMax - levelMin)).coerceIn(0f, 1f)
-        } else 1f
-
+        // 🆕 ПРЯМОЙ ПОДСЧЁТ: показываем реальные баллы / порог следующего уровня
+        val nextLevelThreshold = PointsCalculator.getLevelMaxPoints(level)
         val progressLabel = String.format(
             "%.2f / %.0f",
-            totalPoints - levelMin,
-            levelMax - levelMin
+            totalPoints,
+            nextLevelThreshold
         )
+
+        // Прогресс-бар: от 0 до порога следующего уровня
+        val progress = if (nextLevelThreshold > 0) {
+            (totalPoints / nextLevelThreshold).coerceIn(0f, 1f)
+        } else 1f
+
+
 
         // 3. Прогресс по категориям
         val categoryProgress = categories.map { cat ->
             val points = pointsByCategory[cat.id] ?: 0f
+
+            // 🆕 Собираем привычки этой категории с их баллами
+            val habitsOfCategory = habits.filter { it.categoryId == cat.id }
+            val habitPointsList = habitsOfCategory.map { habit ->
+                val habitLogs = logs.filter { it.habitId == habit.id }
+                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }.toFloat()
+
+                HabitPointsUi(
+                    habitId = habit.id,
+                    habitName = habit.name,
+                    points = habitTotalPoints
+                )
+            }.sortedByDescending { it.points }  // Сортируем по убыванию баллов
+
             CategoryProgress(
                 id = cat.id,
                 name = cat.name,
                 emoji = cat.iconEmoji,
                 points = points,
-                level = PointsCalculator.getLevel(points)
+                level = PointsCalculator.getLevel(points),
+                habits = habitPointsList  // 🆕
             )
         }
 
@@ -96,8 +125,8 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             userName = prefs.userName,
             totalPoints = totalPoints,
             currentLevel = level,
-            levelMinPoints = levelMin,
-            levelMaxPoints = levelMax,
+            levelMinPoints = PointsCalculator.getLevelMinPoints(level),
+            levelMaxPoints = nextLevelThreshold,
             progressToNextLevel = progress,
             progressLabel = progressLabel,
             motivationQuote = PointsCalculator.getMotivationQuote(level),

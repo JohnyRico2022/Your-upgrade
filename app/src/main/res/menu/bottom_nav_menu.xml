@@ -7,14 +7,18 @@
         android:title="Задачи" />
 
     <item
-        android:id="@+id/userFragment"
-        android:icon="@drawable/ic_person_24"
-        android:title="Профиль" />
-
-    <item
         android:id="@+id/historyFragment"
         android:icon="@drawable/ic_calendar_24"
         android:title="История" />
+
+    <item
+        android:id="@+id/free"
+        android:title="" />
+
+    <item
+        android:id="@+id/rewardsFragment"
+        android:icon="@drawable/ic_star_24"
+        android:title="Награды" />
 
     <item
         android:id="@+id/settingsFragment"

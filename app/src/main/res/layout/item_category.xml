@@ -11,55 +11,92 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:orientation="vertical">
 
-        <!-- Эмодзи -->
-        <TextView
-            android:id="@+id/tvEmoji"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:text="💪"
-            android:textSize="24sp"
-            android:gravity="center" />
-
-        <!-- Название + прогресс -->
+        <!-- Основная строка категории (кликабельная) -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:id="@+id/categoryHeader"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp">
+            android:orientation="horizontal"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:background="?attr/selectableItemBackground">
 
+            <!-- Эмодзи -->
             <TextView
-                android:id="@+id/tvCategoryName"
+                android:id="@+id/tvEmoji"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="💪"
+                android:textSize="24sp"
+                android:gravity="center" />
+
+            <!-- Название + баллы -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvCategoryName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Сила"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvCategoryPoints"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="12.50 баллов • Уровень 1"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
+
+            <!-- Уровень + стрелка -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Сила"
-                android:textSize="15sp"
-                android:textStyle="bold" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-            <TextView
-                android:id="@+id/tvCategoryPoints"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="12.50 баллов • Уровень 1"
-                android:textSize="12sp"
-                android:textColor="?android:attr/textColorSecondary" />
+                <TextView
+                    android:id="@+id/tvCategoryLevel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ур. 1"
+                    android:textSize="13sp"
+                    android:textColor="?attr/colorPrimary"
+                    android:textStyle="bold" />
+
+                <!-- 🆕 Стрелка раскрытия -->
+                <TextView
+                    android:id="@+id/tvExpandArrow"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="▼"
+                    android:textSize="12sp"
+                    android:textColor="?android:attr/textColorSecondary" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Уровень -->
-        <TextView
-            android:id="@+id/tvCategoryLevel"
-            android:layout_width="wrap_content"
+        <!-- 🆕 Раскрывающийся список привычек -->
+        <LinearLayout
+            android:id="@+id/habitsContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ур. 1"
-            android:textSize="13sp"
-            android:textColor="?attr/colorPrimary"
-            android:textStyle="bold" />
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:paddingBottom="8dp" />
 
     </LinearLayout>
 

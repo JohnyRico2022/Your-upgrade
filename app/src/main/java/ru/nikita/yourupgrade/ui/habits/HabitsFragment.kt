@@ -124,6 +124,8 @@ class HabitsFragment : Fragment() {
 
             this.onValueEntered = { value ->
                 viewModel.saveMeasurableValue(habit.id, value)
+
+                launchConfetti()
             }
         }
         dialog.show(childFragmentManager, "input_value")

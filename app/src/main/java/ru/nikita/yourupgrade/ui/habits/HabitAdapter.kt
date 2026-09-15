@@ -8,7 +8,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import ru.nikita.yourupgrade.data.model.CompletionMode
-import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.databinding.ItemHabitBinding
 
 class HabitAdapter(
@@ -37,7 +36,6 @@ class HabitAdapter(
         fun bind(item: HabitUiItem) {
             binding.tvHabitName.text = item.name
             binding.tvCategory.text = "${item.categoryEmoji} ${item.categoryName}"
-            binding.tvType.text = if (item.type == HabitType.DAILY) "Ежедневно" else "Еженедельно"
 
             binding.root.setOnClickListener { onItemClick(item) }
 
@@ -56,14 +54,10 @@ class HabitAdapter(
 
                     binding.cbDone.isChecked = item.isDoneToday
                     binding.cbDone.setOnClickListener {
-                        if (item.isDoneToday) {
-                            // 🆕 Снятие отметки — через подтверждение
-                            showUnmarkConfirmation(item)
-                        } else {
-                            // Отметка — сразу, без диалога
-                            onMarkDone(item)
-                        }
-
+                        if (item.isDoneToday)
+                            showUnmarkConfirmation(item)  // Снятие отметки через подтверждение
+                        else
+                            onMarkDone(item) // Отметка сразу
                     }
                 }
 
@@ -98,11 +92,6 @@ class HabitAdapter(
                     }
                 }
             }
-
-            /// Полупрозрачность для выполненных
-//            val alpha = if (item.isDoneToday || item.isFullyDone) 0.6f else 1.0f
-//            binding.tvHabitName.alpha = alpha
-//            binding.tvCategory.alpha = alpha
 
             binding.root.setOnClickListener { onItemClick(item) }
         }

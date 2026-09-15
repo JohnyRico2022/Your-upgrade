@@ -1,41 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:fitsSystemWindows="true">
-
-    <!-- InfoBar: всегда виден -->
-    <LinearLayout
-        android:id="@+id/infoBar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="?attr/colorPrimary"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
-
-        <TextView
-            android:id="@+id/tvUserName"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Имя"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvLevel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Уровень 1"
-            android:textColor="@android:color/white"
-            android:textSize="14sp" />
-    </LinearLayout>
+    android:fitsSystemWindows="true"
+    android:orientation="vertical">
 
     <!-- Контейнер фрагментов -->
     <androidx.fragment.app.FragmentContainerView
@@ -43,8 +12,11 @@
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
         app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
     <!-- Нижняя навигация -->
@@ -52,6 +24,22 @@
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:menu="@menu/bottom_nav_menu" />
 
-</LinearLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/user_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:backgroundTint="@color/purple_light"
+        android:src="@drawable/ic_person_24"
+        app:elevation="8dp"
+        app:fabSize="normal"
+        app:layout_constraintBottom_toBottomOf="@id/bottomNavigation"
+        app:layout_constraintEnd_toEndOf="@id/bottomNavigation"
+        app:layout_constraintStart_toStartOf="@id/bottomNavigation"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

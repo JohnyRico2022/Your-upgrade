@@ -19,5 +19,12 @@ data class CategoryProgress(
     val name: String,
     val emoji: String,
     val points: Float,
-    val level: Int
+    val level: Int,
+    val habits: List<HabitPointsUi> = emptyList()
+)
+
+data class HabitPointsUi(
+    val habitId: Long,
+    val habitName: String,
+    val points: Float
 )

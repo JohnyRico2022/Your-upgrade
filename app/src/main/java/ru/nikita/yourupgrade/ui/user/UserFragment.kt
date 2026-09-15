@@ -11,6 +11,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.launch
+import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.databinding.FragmentUserBinding
 
 class UserFragment : Fragment() {
@@ -48,7 +49,6 @@ class UserFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.tvGreeting.text = "Привет"
                     binding.tvUserName.text = state.userName
                     binding.tvMotivation.text = state.motivationQuote
 
@@ -65,9 +65,24 @@ class UserFragment : Fragment() {
 
                     // Категории
                     categoryAdapter.submitList(state.categories)
+
+                    applyLevelBackground(state.currentLevel)
                 }
             }
         }
+    }
+
+    // Метод смены фона
+    private fun applyLevelBackground(level: Int) {
+        val backgroundRes = when (level) {
+            1 -> R.drawable.bg_level_1  // Бронза
+            2 -> R.drawable.bg_level_2  // Серебро
+            3 -> R.drawable.bg_level_3  // Золото
+            4 -> R.drawable.bg_level_4  // Изумруд
+            5 -> R.drawable.bg_level_5  // Рубин
+            else -> R.drawable.bg_level_1
+        }
+        binding.levelBackground.setBackgroundResource(backgroundRes)
     }
 
     override fun onDestroyView() {

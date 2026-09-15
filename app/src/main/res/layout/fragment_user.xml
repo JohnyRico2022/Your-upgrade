@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -11,15 +10,6 @@
         android:orientation="vertical"
         android:padding="24dp">
 
-        <!-- 🆕 Приветствие и имя -->
-        <TextView
-            android:id="@+id/tvGreeting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Привет"
-            android:textSize="16sp"
-            android:textColor="?android:attr/textColorSecondary" />
-
         <TextView
             android:id="@+id/tvUserName"
             android:layout_width="wrap_content"
@@ -29,29 +19,32 @@
             android:textSize="28sp"
             android:textStyle="bold" />
 
-        <!-- 🆕 Мотивационная фраза -->
         <TextView
             android:id="@+id/tvMotivation"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Каждый шаг вперёд — это победа"
-            android:textSize="14sp"
+            android:text="Каждый шаг вперёд — это победа!"
             android:textColor="?android:attr/textColorSecondary"
+            android:textSize="14sp"
             android:textStyle="italic" />
 
-        <!-- 🆕 Крупный уровень -->
+        <!-- 🆕 Добавляем id -->
         <androidx.cardview.widget.CardView
+            android:id="@+id/cardLevel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            app:cardBackgroundColor="@android:color/transparent"
             app:cardCornerRadius="16dp"
-            app:cardElevation="4dp"
-            app:cardBackgroundColor="?attr/colorPrimary">
+            app:cardElevation="4dp">
 
+            <!-- Внутренний LinearLayout будет иметь градиентный фон -->
             <LinearLayout
+                android:id="@+id/levelBackground"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_level_1"
                 android:orientation="vertical"
                 android:padding="20dp">
 
@@ -59,8 +52,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Общий уровень"
-                    android:textSize="13sp"
-                    android:textColor="#CCFFFFFF" />
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="13sp" />
 
                 <TextView
                     android:id="@+id/tvLevel"
@@ -68,11 +61,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="1"
+                    android:textColor="@android:color/white"
                     android:textSize="56sp"
-                    android:textStyle="bold"
-                    android:textColor="@android:color/white" />
+                    android:textStyle="bold" />
 
-                <!-- Прогресс-бар -->
                 <ProgressBar
                     android:id="@+id/progressLevel"
                     style="@style/Widget.AppCompat.ProgressBar.Horizontal"
@@ -81,8 +73,8 @@
                     android:layout_marginTop="16dp"
                     android:max="100"
                     android:progress="0"
-                    android:progressTint="@android:color/white"
-                    android:progressBackgroundTint="#55FFFFFF" />
+                    android:progressBackgroundTint="#55FFFFFF"
+                    android:progressTint="@android:color/white" />
 
                 <TextView
                     android:id="@+id/tvProgressLabel"
@@ -90,8 +82,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="0.00 / 30"
-                    android:textSize="13sp"
-                    android:textColor="#CCFFFFFF" />
+                    android:textColor="#CCFFFFFF"
+                    android:textSize="13sp" />
 
             </LinearLayout>
 

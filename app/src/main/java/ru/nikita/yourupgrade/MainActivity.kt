@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import ru.nikita.yourupgrade.alarm.PenaltyChecker
@@ -18,12 +19,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: PreferencesManager
 
-    // 🆕 Лаунчер запроса разрешения на уведомления
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        // Разрешение получено или отклонено — не критично
-    }
+    ) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +31,8 @@ class MainActivity : AppCompatActivity() {
         prefs = PreferencesManager(this)
 
         requestNotificationPermission()
-        setupInfoBar()
         setupNavigation()
+        setupFab()
 
         PenaltyChecker.checkAndApplyPenalties(this)
     }
@@ -51,16 +49,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupInfoBar() {
-        binding.tvUserName.text = prefs.userName
-        binding.tvLevel.text = "Уровень 1"
-    }
-
     private fun setupNavigation() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.navHostFragment) as NavHostFragment
         val navController = navHostFragment.navController
 
         binding.bottomNavigation.setupWithNavController(navController)
+
+        // 🆕 Следим за изменениями в навигации, чтобы управлять подсветкой
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            // ID табов нижнего меню
+            val tabIds = setOf(
+                R.id.habitsFragment,
+                R.id.historyFragment,
+                R.id.rewardsFragment,
+                R.id.settingsFragment
+            )
+
+            if (destination.id !in tabIds) {
+                // 🆕 Если мы НЕ на табе — снимаем выделение со всех пунктов меню
+                clearBottomNavigationSelection()
+            }
+        }
+    }
+
+    private fun setupFab() {
+        binding.userFab.setOnClickListener {
+            val navHostFragment = supportFragmentManager
+                .findFragmentById(R.id.navHostFragment) as NavHostFragment
+            val navController = navHostFragment.navController
+
+            // 🆕 Опции навигации:
+            // - popUpTo: возвращаемся к началу графа (очищаем стек от предыдущих фрагментов)
+            // - launchSingleTop: не создаём дубликат userFragment если он уже сверху
+            val navOptions = NavOptions.Builder()
+                .setPopUpTo(R.id.nav_graph, false)  // Оставляем корень в стеке
+                .setLaunchSingleTop(true)           // Не создавать дубликат
+                .build()
+
+            navController.navigate(R.id.userFragment, null, navOptions)
+        }
+    }
+
+    private fun clearBottomNavigationSelection() {
+        val menu = binding.bottomNavigation.menu
+
+        // Временно отключаем "exclusive" режим, чтобы можно было снять все выделения
+        menu.setGroupCheckable(0, true, false)
+        for (i in 0 until menu.size()) {
+            menu.getItem(i).isChecked = false
+        }
+        // Включаем обратно
+        menu.setGroupCheckable(0, true, true)
     }
 }
