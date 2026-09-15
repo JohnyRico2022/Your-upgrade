@@ -32,4 +32,7 @@ interface HabitDao {
 
     @Query("SELECT * FROM habits WHERE id = :id")
     fun getHabitByIdFlow(id: Long): Flow<HabitEntity?>
+
+    @Query("SELECT * FROM habits")
+    suspend fun getAllHabitsSync(): List<HabitEntity>
 }

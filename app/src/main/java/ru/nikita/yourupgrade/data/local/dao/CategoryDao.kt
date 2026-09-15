@@ -18,4 +18,7 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getCategoryById(id: Long): SkillCategoryEntity?
+
+    @Query("SELECT * FROM categories ORDER BY id")
+    suspend fun getAllCategoriesSync(): List<SkillCategoryEntity>
 }

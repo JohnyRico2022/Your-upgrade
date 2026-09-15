@@ -14,12 +14,15 @@ object AlarmScheduler {
     private const val REQUEST_MOTIVATION = 1001
     private const val REQUEST_REMINDER = 1002
 
+    private const val REQUEST_WEEK_SUMMARY = 1004
+
     /**
      * Планирует все будильники (вызывается при старте приложения)
      */
     fun scheduleAll(context: Context) {
         scheduleMotivation(context)
         scheduleReminder(context)
+        scheduleWeekSummary(context)
     }
 
     /**
@@ -110,6 +113,66 @@ object AlarmScheduler {
         } catch (e: SecurityException) {
             Log.e("MyLog", "Ошибка планирования будильника", e)
             // Fallback без точного времени
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+        }
+    }
+
+    // 🆕 Понедельник 8:30 — итоги недели
+    fun scheduleWeekSummary(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            action = AlarmReceiver.ACTION_WEEK_SUMMARY
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            REQUEST_WEEK_SUMMARY,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Находим ближайший понедельник 8:30
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            set(Calendar.HOUR_OF_DAY, 8)
+            set(Calendar.MINUTE, 30)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+
+            // Если понедельник уже прошёл на этой неделе — на следующую
+            if (timeInMillis <= System.currentTimeMillis()) {
+                add(Calendar.WEEK_OF_YEAR, 1)
+            }
+        }
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (alarmManager.canScheduleExactAlarms()) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.set(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                }
+            } else {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
+            }
+        } catch (e: SecurityException) {
             alarmManager.set(
                 AlarmManager.RTC_WAKEUP,
                 calendar.timeInMillis,

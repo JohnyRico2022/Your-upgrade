@@ -15,10 +15,10 @@ object NotificationHelper {
 
     private const val CHANNEL_ID = "habit_reminders"
     private const val CHANNEL_NAME = "Напоминания о привычках"
-
-    // Уникальные ID для каждого уведомления
     private const val NOTIFICATION_ID_MOTIVATION = 1001
     private const val NOTIFICATION_ID_REMINDER = 1002
+
+    private const val NOTIFICATION_ID_WEEK_SUMMARY = 1003
 
     /**
      * Создаёт канал уведомлений (нужно вызвать один раз при старте)
@@ -110,4 +110,14 @@ object NotificationHelper {
             notificationId = NOTIFICATION_ID_REMINDER
         )
     }
+
+    fun showWeekSummary(context: Context) {
+        showNotification(
+            context,
+            title = "Итоги прошлой недели готовы! 📊",
+            text = "Проверь, как прошла твоя неделя и какие привычки ты выполнил.",
+            notificationId = NOTIFICATION_ID_WEEK_SUMMARY
+        )
+    }
+
 }

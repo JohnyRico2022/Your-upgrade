@@ -30,4 +30,8 @@ interface HabitLogDao {
 
     @Query("UPDATE habit_logs SET completedValue = :value, earnedPoints = :points WHERE habitId = :habitId AND date = :date")
     suspend fun updateLog(habitId: Long, date: String, value: Float, points: Float)
+
+    // 🆕 Метод для получения логов за диапазон дат
+    @Query("SELECT * FROM habit_logs WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
+    suspend fun getLogsForDateRange(startDate: String, endDate: String): List<HabitLogEntry>
 }
