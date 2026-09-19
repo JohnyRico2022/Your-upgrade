@@ -3,7 +3,17 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
-    <color name="purple80">#CC9C27B0</color>
+
+    <!--app background-->
+    <color name="bg_light_yellow">#F4E5C0</color>
+
+    <color name="yellow">#E0B349</color>
+
+
+    <color name="primary_green">#2E5A3C</color>
+    <color name="text_secondary">#757575</color>
+
+    <color name="purple80">#9C27B0</color>
     <color name="purple_light">#C24ED6</color>
     <color name="purple50">#809C27B0</color>
 </resources>

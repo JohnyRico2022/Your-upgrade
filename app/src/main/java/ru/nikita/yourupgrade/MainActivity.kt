@@ -10,15 +10,16 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.nikita.yourupgrade.alarm.PenaltyChecker
 import ru.nikita.yourupgrade.databinding.ActivityMainBinding
+import ru.nikita.yourupgrade.ui.common.BottomMenu
 import ru.nikita.yourupgrade.util.PreferencesManager
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefs: PreferencesManager
-
     private val notificationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { }
@@ -32,7 +33,6 @@ class MainActivity : AppCompatActivity() {
 
         requestNotificationPermission()
         setupNavigation()
-        setupFab()
 
         PenaltyChecker.checkAndApplyPenalties(this)
     }
@@ -54,52 +54,37 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.navHostFragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-        binding.bottomNavigation.setupWithNavController(navController)
+      //  binding.bottomNavigation.setupWithNavController(navController)
 
         // 🆕 Следим за изменениями в навигации, чтобы управлять подсветкой
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            // ID табов нижнего меню
-            val tabIds = setOf(
-                R.id.habitsFragment,
-                R.id.historyFragment,
-                R.id.rewardsFragment,
-                R.id.settingsFragment
-            )
-
-            if (destination.id !in tabIds) {
-                // 🆕 Если мы НЕ на табе — снимаем выделение со всех пунктов меню
-                clearBottomNavigationSelection()
+        // Кастомный бар вместо BottomNavigationView
+        binding.bottomNavigation.onTabSelected = { position ->
+            val destinationId = when (position) {
+                0 -> R.id.habitsFragment
+                1 -> R.id.historyFragment
+                2 -> R.id.rewardsFragment
+                3 -> R.id.settingsFragment
+                else -> R.id.habitsFragment
             }
+            navController.navigate(destinationId, null, NavOptions.Builder()
+                .setPopUpTo(R.id.nav_graph, false)
+                .setLaunchSingleTop(true)
+                .build())
+
+
         }
-    }
 
-    private fun setupFab() {
-        binding.userFab.setOnClickListener {
-            val navHostFragment = supportFragmentManager
-                .findFragmentById(R.id.navHostFragment) as NavHostFragment
-            val navController = navHostFragment.navController
-
-            // 🆕 Опции навигации:
-            // - popUpTo: возвращаемся к началу графа (очищаем стек от предыдущих фрагментов)
-            // - launchSingleTop: не создаём дубликат userFragment если он уже сверху
-            val navOptions = NavOptions.Builder()
-                .setPopUpTo(R.id.nav_graph, false)  // Оставляем корень в стеке
-                .setLaunchSingleTop(true)           // Не создавать дубликат
-                .build()
-
-            navController.navigate(R.id.userFragment, null, navOptions)
+        // Синхронизация при навигации назад/вперёд
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.bottomNavigation.setActiveByFragment(destination.id)
         }
-    }
 
-    private fun clearBottomNavigationSelection() {
-        val menu = binding.bottomNavigation.menu
-
-        // Временно отключаем "exclusive" режим, чтобы можно было снять все выделения
-        menu.setGroupCheckable(0, true, false)
-        for (i in 0 until menu.size()) {
-            menu.getItem(i).isChecked = false
+        // FAB
+        binding.fabUser.setOnClickListener {
+            navController.navigate(R.id.userFragment, null, NavOptions.Builder()
+                .setPopUpTo(R.id.nav_graph, false)
+                .setLaunchSingleTop(true)
+                .build())
         }
-        // Включаем обратно
-        menu.setGroupCheckable(0, true, true)
     }
 }

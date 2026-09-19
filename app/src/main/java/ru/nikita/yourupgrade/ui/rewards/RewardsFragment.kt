@@ -1,13 +1,11 @@
 package ru.nikita.yourupgrade.ui.rewards
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import ru.nikita.yourupgrade.R
+import androidx.fragment.app.Fragment
 import ru.nikita.yourupgrade.databinding.FragmentRewardsBinding
-import ru.nikita.yourupgrade.databinding.FragmentSettingsBinding
 
 class RewardsFragment : Fragment() {
 

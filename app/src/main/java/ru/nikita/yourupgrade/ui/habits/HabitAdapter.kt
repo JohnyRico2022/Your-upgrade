@@ -1,12 +1,14 @@
 package ru.nikita.yourupgrade.ui.habits
 
 import android.app.AlertDialog
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.databinding.ItemHabitBinding
 
@@ -39,38 +41,40 @@ class HabitAdapter(
 
             binding.root.setOnClickListener { onItemClick(item) }
 
-            // 🆕 Разная логика для разных типов
             when (item.completionMode) {
+                // Отмечаемые привычки
                 CompletionMode.CHECKABLE -> {
-                    binding.cbDone.visibility = View.VISIBLE
+                    binding.imageDone.visibility = View.VISIBLE
                     binding.tvProgress.visibility = View.GONE
+                    binding.cardRoot.isSelected = item.isFullyDone
 
-                    // 🆕 Зелёный фон для выполненных
-                    val cardView = binding.root
-                    if (item.isFullyDone) {
-                        cardView.setCardBackgroundColor(0xFFE8F5E9.toInt())  // светло-зелёный
-                        binding.tvHabitName.alpha = 0.6f
-                    }
+                    binding.cardRoot.isSelected = false
+                    binding.cardRoot.isActivated = false
 
-                    binding.cbDone.isChecked = item.isDoneToday
-                    binding.cbDone.setOnClickListener {
-                        if (item.isDoneToday)
-                            showUnmarkConfirmation(item)  // Снятие отметки через подтверждение
-                        else
-                            onMarkDone(item) // Отметка сразу
+                    if (item.isDoneToday) {
+                        binding.cardRoot.isSelected = true
+                        binding.imageDone.setImageDrawable(binding.root.context.getDrawable(R.drawable.ic_check_circle_24))
+                    } else
+                        binding.imageDone.setImageDrawable(binding.root.context.getDrawable(R.drawable.ic_check_box_outline_blank_24))
+
+                    binding.imageDone.setOnClickListener {
+                        if (item.isDoneToday) showUnmarkConfirmation(item)
+                        else onMarkDone(item)
                     }
                 }
 
+                // Измеряемые привычки
                 CompletionMode.MEASURABLE -> {
-                    binding.cbDone.visibility = View.GONE
+                    binding.imageDone.visibility = View.GONE
                     binding.tvProgress.visibility = View.VISIBLE
-
                     binding.tvProgress.text = item.progressLabel
 
-                    // 🆕 Цвет в зависимости от процента
+                    // Цвет в зависимости от процента
                     val percent = if (item.targetValue > 0) {
                         item.completedValue / item.targetValue
                     } else 0f
+
+                    Log.d("MyLog", "percent: $percent")
 
                     val progressColor = when {
                         percent == 0f -> 0xFF757575.toInt()        // серый (не начинал)
@@ -80,11 +84,13 @@ class HabitAdapter(
                     }
                     binding.tvProgress.setTextColor(progressColor)
 
-                    // 🆕 Зелёный фон карточки при 100%
-                    val cardView = binding.root as com.google.android.material.card.MaterialCardView
-                    if (percent >= 1.0f) {
-                        cardView.setCardBackgroundColor(0xFFE8F5E9.toInt())
-                        binding.tvHabitName.alpha = 0.6f
+                    binding.cardRoot.isSelected = false
+                    binding.cardRoot.isActivated = false
+
+                    when {
+                        percent >= 1.0f -> binding.cardRoot.isSelected = true    // Зелёный
+                        percent >= 0.5f -> binding.cardRoot.isActivated = true   // Жёлтый
+                        // else: оба false → белый
                     }
 
                     binding.tvProgress.setOnClickListener {
@@ -96,7 +102,6 @@ class HabitAdapter(
             binding.root.setOnClickListener { onItemClick(item) }
         }
 
-        // 🆕 Диалог подтверждения снятия отметки
         private fun showUnmarkConfirmation(item: HabitUiItem) {
             val context = binding.root.context
             AlertDialog.Builder(context)

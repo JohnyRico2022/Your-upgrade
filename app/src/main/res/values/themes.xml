@@ -1,8 +1,24 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.YourUpgrade" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Основные цвета -->
+        <item name="colorPrimary">#2E5A3C</item>
+        <item name="colorPrimaryVariant">#1B3A26</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <item name="colorSecondary">#C9A84C</item>
+        <item name="colorSecondaryVariant">#A68A3E</item>
+        <item name="colorOnSecondary">#2D2D2D</item>
+
+        <!-- Фон -->
+        <item name="android:windowBackground">@drawable/bg_app_gradient</item>
+
+        <!-- Карточки -->
+        <item name="cardBackgroundColor">#FFFFFF</item>
+
+        <!-- Текст -->
+        <!--<item name="android:textColorPrimary">#2D2D2D</item>
+        <item name="android:textColorSecondary">#757575</item>-->
     </style>
 
     <style name="Theme.YourUpgrade" parent="Base.Theme.YourUpgrade" />

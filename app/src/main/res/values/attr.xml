@@ -1,0 +1,7 @@
+<resources>
+    <declare-styleable name="BottomMenuItem">
+        <attr name="icon" format="reference" />
+        <attr name="hintText" format="string" />
+        <attr name="itemId" format="integer" />
+    </declare-styleable>
+</resources>

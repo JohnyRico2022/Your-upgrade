@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Состояние 1: 100% выполнено (selected) → светло-зелёный -->
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#E8F5E9" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+
+    <!-- Состояние 2: 50-99% выполнено (activated) → светло-жёлтый -->
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFF8E1" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+
+    <!-- Состояние 3: менее 50% или не начато → белый -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="12dp" />
+        </shape>
+    </item>
+</selector>

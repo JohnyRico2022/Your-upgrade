@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 100% выполнено → зелёная рамка -->
+    <item android:color="#4CAF50" android:state_selected="true" />
+
+    <!-- 50-99% выполнено → жёлтая рамка -->
+    <item android:color="#FFB300" android:state_activated="true" />
+
+    <!-- Остальное → серая рамка -->
+    <item android:color="#EEEEEE" />
+</selector>
