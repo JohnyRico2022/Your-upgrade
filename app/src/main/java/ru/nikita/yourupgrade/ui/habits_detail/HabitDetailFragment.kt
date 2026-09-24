@@ -1,8 +1,10 @@
-package ru.nikita.yourupgrade.ui.habits
+package ru.nikita.yourupgrade.ui.habits_detail
 
 import android.app.AlertDialog
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
@@ -19,6 +21,7 @@ import kotlinx.coroutines.launch
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.databinding.FragmentHabitDetailBinding
+import ru.nikita.yourupgrade.ui.habits.DayCompletionStatus
 
 class HabitDetailFragment : Fragment() {
 
@@ -27,6 +30,7 @@ class HabitDetailFragment : Fragment() {
 
     private val viewModel: HabitDetailViewModel by viewModels()
     private lateinit var dayAdapter: DayStatusAdapter
+    private lateinit var gestureDetector: GestureDetector
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,10 +44,8 @@ class HabitDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Получаем habitId из аргументов
         val habitId = arguments?.getLong("habitId", -1L) ?: -1L
         if (habitId == -1L) {
-            // Если нет ID — возвращаемся
             parentFragmentManager.popBackStack()
             return
         }
@@ -51,6 +53,7 @@ class HabitDetailFragment : Fragment() {
         viewModel.setHabitId(habitId)
 
         setupWeekRecyclerView()
+        setupSwipeGestures()  // 🆕
         observeData()
     }
 
@@ -64,43 +67,97 @@ class HabitDetailFragment : Fragment() {
         binding.rvWeekDays.adapter = dayAdapter
     }
 
+
+    // 🆕 Настройка свайпов на карточку недели
+    private fun setupSwipeGestures() {
+        gestureDetector =
+            GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+
+                private val SWIPE_THRESHOLD = 100
+                private val SWIPE_VELOCITY_THRESHOLD = 100
+
+                override fun onFling(
+                    e1: MotionEvent?,
+                    e2: MotionEvent,
+                    velocityX: Float,
+                    velocityY: Float
+                ): Boolean {
+                    if (e1 == null) return false
+
+                    val diffX = e2.x - e1.x
+                    val diffY = e2.y - e1.y
+
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffX > 0) {
+                                // Свайп вправо → предыдущая неделя
+                                viewModel.previousWeek()
+                            } else {
+                                // Свайп влево → следующая неделя (если можно)
+                                if (viewModel.canGoNext()) {
+                                    viewModel.nextWeek()
+                                }
+                            }
+                            return true
+                        }
+                    }
+                    return false
+                }
+            })
+
+        binding.cardWeek.setOnTouchListener { v, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+    }
+
+
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 combine(viewModel.habit, viewModel.weekLogs) { habit, logs ->
                     if (habit != null) {
-                        // Заголовок
+                        /** Заголовок */
                         binding.tvHabitName.text = habit.name
 
                         binding.btnMenu.setOnClickListener {
                             showHabitMenu()
                         }
 
-
-                        // Категория (пока без запроса категории, просто тип)
-                        val typeLabel = if (habit.type == HabitType.DAILY) "Ежедневно" else "Еженедельно"
+                        /** Категория */
+                        val typeLabel =
+                            if (habit.type == HabitType.DAILY) "Ежедневно" else "Еженедельно"
                         binding.tvCategoryInfo.text = typeLabel
 
-                        // Цель
+                        /** Цель */
                         binding.tvTargetInfo.text = when (habit.completionMode) {
                             CompletionMode.MEASURABLE -> "Цель: ${habit.targetValue.toLong()}"
                             CompletionMode.CHECKABLE -> "Отмечаемая привычка"
                         }
 
-                        // Дни недели
+                        /** Заголовок недели */
+                        binding.tvWeekTitle.text = viewModel.getWeekTitle()
+
+                        /** Дни недели */
                         val weekStatuses = viewModel.buildWeekStatuses(habit, logs)
                         dayAdapter.submitList(weekStatuses)
 
-                        // Сводка
-                        val doneCount = weekStatuses.count { it.isFullyDone }
-                        binding.tvWeekSummary.text = "Выполнено: $doneCount из 7 дней"
+                        /** Сводка */
+                        val doneCount = weekStatuses.count {
+                            it.status == DayCompletionStatus.DONE ||
+                                    it.status == DayCompletionStatus.PARTIAL
+                        }
+                        val totalDays = weekStatuses.count {
+                            it.status != DayCompletionStatus.NOT_CREATED
+                        }
+
+                        binding.tvWeekSummary.text = "$doneCount из $totalDays дней"
                     }
                 }.collect { }
             }
         }
     }
 
-    // 🆕 Метод показа меню
     private fun showHabitMenu() {
         val popup = PopupMenu(requireContext(), binding.btnMenu)
         popup.menu.add(0, 1, 0, "Переименовать")
@@ -112,11 +169,13 @@ class HabitDetailFragment : Fragment() {
                     showRenameDialog()
                     true
                 }
+
                 2 -> {
                     // Пока не реализуем
                     Toast.makeText(requireContext(), "Скоро будет", Toast.LENGTH_SHORT).show()
                     true
                 }
+
                 else -> false
             }
         }
@@ -124,7 +183,6 @@ class HabitDetailFragment : Fragment() {
         popup.show()
     }
 
-    // 🆕 Диалог переименования
     private fun showRenameDialog() {
         val currentName = binding.tvHabitName.text.toString()
 

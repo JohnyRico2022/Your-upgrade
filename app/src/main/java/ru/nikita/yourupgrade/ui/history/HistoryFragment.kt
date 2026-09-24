@@ -1,21 +1,22 @@
 package ru.nikita.yourupgrade.ui.history
 
 import android.os.Bundle
+import android.view.GestureDetector
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import ru.nikita.yourupgrade.R
-import ru.nikita.yourupgrade.databinding.FragmentHistoryBinding
 import kotlinx.coroutines.launch
-import android.widget.Toast
+import ru.nikita.yourupgrade.databinding.FragmentHistoryBinding
 import java.util.Locale
 
 class HistoryFragment : Fragment() {
@@ -24,6 +25,7 @@ class HistoryFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: WeekStatsViewModel by viewModels()
+    private lateinit var gestureDetector: GestureDetector
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,30 +40,20 @@ class HistoryFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupToggle()
-        setupWeekNavigation()
         setupDayLabels()
         setupBarChart()
+        setupSwipeGestures()
         observeState()
     }
 
     private fun setupToggle() {
-        binding.btnWeek.isChecked = true
+        binding.buttonWeek.isChecked = true
 
         binding.togglePeriod.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked && checkedId == binding.btnMonth.id) {
+            if (isChecked && checkedId == binding.buttonMonth.id) {
                 Toast.makeText(requireContext(), "Месяц: скоро будет", Toast.LENGTH_SHORT).show()
-                binding.btnWeek.isChecked = true
+                binding.buttonWeek.isChecked = true
             }
-        }
-    }
-
-    private fun setupWeekNavigation() {
-        binding.btnPrevWeek.setOnClickListener {
-            viewModel.previousWeek()
-        }
-
-        binding.btnNextWeek.setOnClickListener {
-            viewModel.nextWeek()
         }
     }
 
@@ -87,8 +79,97 @@ class HistoryFragment : Fragment() {
 
     private fun setupBarChart() {
         binding.barChart.setOnDayClickListener { index ->
-            android.util.Log.d("HistoryFragment", "Клик по дню: $index")
             viewModel.selectDay(index)
+        }
+    }
+
+    // 🆕 Настройка свайпов
+    private fun setupSwipeGestures() {
+        gestureDetector =
+            GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
+
+                private val SWIPE_THRESHOLD = 100
+                private val SWIPE_VELOCITY_THRESHOLD = 100
+
+                override fun onFling(
+                    e1: MotionEvent?,
+                    e2: MotionEvent,
+                    velocityX: Float,
+                    velocityY: Float
+                ): Boolean {
+                    if (e1 == null) return false
+
+                    val diffX = e2.x - e1.x
+                    val diffY = e2.y - e1.y
+
+                    if (Math.abs(diffX) > Math.abs(diffY)) {
+                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                            if (diffX > 0) {
+                                // Свайп вправо → предыдущая неделя
+                                viewModel.previousWeek()
+                            } else {
+                                // Свайп влево → следующая неделя
+                                viewModel.nextWeek()
+                            }
+                            return true
+                        }
+                    }
+                    return false
+                }
+            })
+
+        // Применяем GestureDetector к карточке заголовка недели
+        binding.cardWeekHeader.setOnTouchListener { v, event ->
+            gestureDetector.onTouchEvent(event)
+            true
+        }
+    }
+
+    // Заполняем числа баллов под столбиками
+    private fun fillNumbers(days: List<DayStats>) {
+        binding.numbersContainer.removeAllViews()
+
+        days.forEach { day ->
+            val hasAnyData = day.habits.isNotEmpty() &&
+                    day.habits.any { it.status != DayHabitStatus.NOT_CREATED }
+
+            val tv = TextView(requireContext()).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    0,
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
+                    1f
+                )
+                gravity = android.view.Gravity.CENTER
+                textSize = 12f
+
+                if (!hasAnyData) {
+                    // День без данных (привычки ещё не были созданы)
+                    text = "—"
+                    setTextColor(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            android.R.color.darker_gray
+                        )
+                    )
+                } else {
+                    // Форматируем число с двумя знаками
+                    val pointsText = if (day.points >= 0) {
+                        String.format(Locale.getDefault(), "+%.2f", day.points)
+                    } else {
+                        String.format(Locale.getDefault(), "%.2f", day.points)
+                    }
+                    text = pointsText
+
+                    // Цвет по знаку
+                    val color = when {
+                        day.points > 0 -> 0xFF4CAF50.toInt()   // Зелёный
+                        day.points < 0 -> 0xFFE53935.toInt()   // Красный
+                        else -> 0xFF9E9E9E.toInt()              // Серый (ровно 0)
+                    }
+                    setTextColor(color)
+                }
+            }
+            binding.numbersContainer.addView(tv)
         }
     }
 
@@ -99,8 +180,26 @@ class HistoryFragment : Fragment() {
                     binding.tvWeekTitle.text = "Неделя ${state.weekNumber}"
                     binding.tvWeekRange.text = state.dateRangeLabel
 
-                    binding.btnNextWeek.isEnabled = viewModel.canGoNext()
-                    binding.btnNextWeek.alpha = if (viewModel.canGoNext()) 1f else 0.3f
+                    val hasAnyData = state.days.any { day ->
+                        day.habits.isNotEmpty() && day.habits.any { it.status != DayHabitStatus.NOT_CREATED }
+                    }
+
+                    if (hasAnyData) {
+                        // Показываем диаграмму
+                        binding.chartContainer.visibility = View.VISIBLE
+                        binding.tvNoData.visibility = View.GONE
+
+                        val points = state.days.map { it.points }
+                        binding.barChart.setData(points, state.selectedDayIndex)
+
+                        // 🆕 Заполняем числа под столбиками
+                        fillNumbers(state.days)
+                    } else {
+                        // Показываем баннер
+                        binding.chartContainer.visibility = View.GONE
+                        binding.tvNoData.visibility = View.VISIBLE
+                    }
+
 
                     val points = state.days.map { it.points }
                     binding.barChart.setData(points, state.selectedDayIndex)
@@ -119,31 +218,26 @@ class HistoryFragment : Fragment() {
                     }
                     binding.tvWeekTotal.setTextColor(totalColor)
 
-                    // 🆕 Детали выбранного дня через LinearLayout
+                    // Детали выбранного дня
                     val selectedDay = state.selectedDay
                     if (selectedDay != null) {
-                        binding.tvDayDetailsTitle.visibility = View.VISIBLE
-                        binding.dayDetailsContainer.visibility = View.VISIBLE
+                        binding.cardDayDetails.visibility = View.VISIBLE
 
-                        val dayFormatter = java.time.format.DateTimeFormatter.ofPattern("EEEE, dd.MM")
+                        val dayFormatter =
+                            java.time.format.DateTimeFormatter.ofPattern("EEEE, dd.MM")
                         binding.tvDayDetailsTitle.text = selectedDay.date.format(dayFormatter)
 
-                        // 🆕 Заполняем контейнер
                         fillDayDetails(selectedDay.habits)
                     } else {
-                        binding.tvDayDetailsTitle.visibility = View.GONE
-                        binding.dayDetailsContainer.visibility = View.GONE
+                        binding.cardDayDetails.visibility = View.GONE
                     }
                 }
             }
         }
     }
 
-    // 🆕 Заполняем список привычек за день
     private fun fillDayDetails(habits: List<HabitDayStatus>) {
         binding.dayDetailsContainer.removeAllViews()
-
-        android.util.Log.d("HistoryFragment", "fillDayDetails: ${habits.size} привычек")
 
         habits.forEach { habit ->
             val habitView = createHabitRow(habit)
@@ -151,7 +245,6 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    // 🆕 Создаём строку для одной привычки
     private fun createHabitRow(habit: HabitDayStatus): View {
         val context = requireContext()
 
@@ -161,16 +254,10 @@ class HistoryFragment : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             )
-            setPadding(
-                dpToPx(12),
-                dpToPx(12),
-                dpToPx(12),
-                dpToPx(12)
-            )
+            setPadding(dpToPx(4), dpToPx(8), dpToPx(4), dpToPx(8))
             gravity = android.view.Gravity.CENTER_VERTICAL
         }
 
-        // Статус (✔️ / ❌ / ➖)
         val (icon, color) = when (habit.status) {
             DayHabitStatus.DONE -> "✔️" to 0xFF4CAF50.toInt()
             DayHabitStatus.MISSED -> "❌" to 0xFFE53935.toInt()
@@ -180,11 +267,11 @@ class HistoryFragment : Fragment() {
         val statusView = TextView(context).apply {
             text = icon
             textSize = 16f
-            layoutParams = LinearLayout.LayoutParams(dpToPx(32), ViewGroup.LayoutParams.WRAP_CONTENT)
+            layoutParams =
+                LinearLayout.LayoutParams(dpToPx(32), ViewGroup.LayoutParams.WRAP_CONTENT)
             gravity = android.view.Gravity.CENTER
         }
 
-        // Название привычки
         val nameView = TextView(context).apply {
             text = "${habit.categoryEmoji} ${habit.habitName}"
             textSize = 15f
@@ -197,10 +284,16 @@ class HistoryFragment : Fragment() {
             }
         }
 
-        // Баллы
         val pointsText = when {
             habit.status == DayHabitStatus.NOT_CREATED -> ""
-            habit.earnedPoints >= 0 -> "+${String.format(Locale.getDefault(), "%.2f", habit.earnedPoints)}"
+            habit.earnedPoints >= 0 -> "+${
+                String.format(
+                    Locale.getDefault(),
+                    "%.2f",
+                    habit.earnedPoints
+                )
+            }"
+
             else -> String.format(Locale.getDefault(), "%.2f", habit.earnedPoints)
         }
 

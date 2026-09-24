@@ -15,11 +15,32 @@
 
         <!-- Карточки -->
         <item name="cardBackgroundColor">#FFFFFF</item>
-
-        <!-- Текст -->
-        <!--<item name="android:textColorPrimary">#2D2D2D</item>
-        <item name="android:textColorSecondary">#757575</item>-->
     </style>
 
     <style name="Theme.YourUpgrade" parent="Base.Theme.YourUpgrade" />
+
+    <!-- Тема SplashScreen -->
+    <!-- <style name="Theme.App.Splash" parent="Theme.SplashScreen">
+         <item name="windowSplashScreenBackground">@color/main_gold</item>
+         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+         <item name="postSplashScreenTheme">@style/Base.Theme.YourUpgrade</item>
+     </style>-->
+
+    <style name="Theme.App.Splash" parent="Theme.SplashScreen">
+        <item name="android:windowSplashScreenBackground">@color/main_gold</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@color/main_gold</item>
+        <item name="postSplashScreenTheme">@style/Theme.YourUpgrade</item>
+    </style>
+
+    <style name="Widget.App.ToggleButtonGroup" parent="Widget.MaterialComponents.MaterialButtonToggleGroup">
+        <item name="materialButtonStyle">@style/Widget.App.ToggleButton</item>
+    </style>
+
+    <style name="Widget.App.ToggleButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">@color/toggle_button_bg</item>
+        <item name="android:textColor">@color/toggle_button_text</item>
+        <item name="strokeColor">@color/main_gold</item>
+    </style>
+
 </resources>

@@ -12,8 +12,9 @@
     android:foreground="?attr/selectableItemBackground"
     app:cardCornerRadius="12dp"
     app:cardElevation="3dp"
+    app:strokeWidth="1dp"
     app:strokeColor="@color/habit_check_selector"
-    app:strokeWidth="1dp">
+    >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"

@@ -1,10 +1,13 @@
 package ru.nikita.yourupgrade.ui.habits
 
-import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import ru.nikita.yourupgrade.databinding.DialogInputValueBinding
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 
 class InputValueDialogFragment : DialogFragment() {
 
@@ -14,29 +17,79 @@ class InputValueDialogFragment : DialogFragment() {
     var habitName: String = ""
     var targetValue: Float = 1f
     var currentValue: Float = 0f
-
     var onValueEntered: ((Float) -> Unit)? = null
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        _binding = DialogInputValueBinding.inflate(layoutInflater)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = DialogInputValueBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // Убираем стандартный фон диалога
+        dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        setupUI()
+        setupListeners()
+    }
+
+    private fun setupUI() {
         binding.tvDialogTitle.text = habitName
-        binding.tvTargetInfo.text = "Цель: ${targetValue.toLong()}"
+        binding.tvTargetInfo.text = "Цель: ${targetValue.toInt()}"
+
+        binding.etValue.setSelectAllOnFocus(true)
+
+        // Показываем текущее значение если есть
         if (currentValue > 0) {
-            binding.etValue.setText(currentValue.toString())
+            binding.tvCurrentValue.visibility = View.VISIBLE
+            binding.tvCurrentValue.text = "Сейчас: ${currentValue.toInt()}"
+            binding.etValue.setText(currentValue.toInt().toString())
         }
 
-        return AlertDialog.Builder(requireContext())
-            .setView(binding.root)
-            .setPositiveButton("Сохранить") { _, _ ->
-                val value = binding.etValue.text.toString().toFloatOrNull() ?: 0f
-                onValueEntered?.invoke(value)
+        binding.etValue.postDelayed({
+            binding.etValue.requestFocus()
+            val imm =
+                requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(binding.etValue, InputMethodManager.SHOW_IMPLICIT)
+        }, 100)
+    }
+
+    private fun setupListeners() {
+        binding.btnCancel.setOnClickListener {
+            dismiss()
+        }
+
+        binding.btnSave.setOnClickListener {
+            val text = binding.etValue.text.toString()
+
+            if (text.isBlank()) {
+                binding.etValue.error = "Введите значение"
+                return@setOnClickListener
             }
-            .setNegativeButton("Отмена", null)
-            .setNeutralButton("Сбросить") { _, _ ->
-                onValueEntered?.invoke(0f)
+
+            val value = text.toFloatOrNull()
+            if (value == null || value < 0) {
+                binding.etValue.error = "Некорректное значение"
+                return@setOnClickListener
             }
-            .create()
+
+            onValueEntered?.invoke(value)
+            dismiss()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // Ширина диалога 90% от экрана
+        dialog?.window?.setLayout(
+            (resources.displayMetrics.widthPixels * 0.9).toInt(),
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
     }
 
     override fun onDestroyView() {

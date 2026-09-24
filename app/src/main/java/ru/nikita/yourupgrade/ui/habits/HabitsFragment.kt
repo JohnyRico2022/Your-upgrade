@@ -22,7 +22,7 @@ import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.databinding.FragmentHabitsBinding
 import java.util.concurrent.TimeUnit
 import androidx.navigation.fragment.findNavController
-import ru.nikita.yourupgrade.R  // ← проверьте импорт!
+import ru.nikita.yourupgrade.R
 
 class HabitsFragment : Fragment() {
 
@@ -55,6 +55,7 @@ class HabitsFragment : Fragment() {
             onItemClick = { habit ->
                 // 🎯 Переход на детали — используем ID destination напрямую
                 val bundle = Bundle().apply {
+                    //todo вынести в ключи
                     putLong("habitId", habit.id)
                 }
                 findNavController().navigate(
@@ -62,7 +63,6 @@ class HabitsFragment : Fragment() {
                     bundle
                 )
             },
-            onDeleteClick = { viewModel.deleteHabit(it.id) },
             onMarkDone = { habit ->
                 viewModel.toggleHabitCompletion(habit.id)
                 launchConfetti()  // 🆕 Конфетти при отметке!
@@ -73,6 +73,7 @@ class HabitsFragment : Fragment() {
             },
             onProgressClick = { habit -> showInputValueDialog(habit) }
         )
+
         weeklyAdapter = HabitAdapter(
             onItemClick = { habit ->
                 // 🆕 Переход на экран деталей
@@ -84,7 +85,6 @@ class HabitsFragment : Fragment() {
                     bundle
                 )
             },
-            onDeleteClick = { viewModel.deleteHabit(it.id) },
             onMarkDone = { /* для еженедельных позже */ },
             onUnmarkDone = { /* для еженедельных позже */ },
             onProgressClick = { /* для еженедельных позже */ }
@@ -97,7 +97,7 @@ class HabitsFragment : Fragment() {
         binding.rvWeeklyHabits.adapter = weeklyAdapter
     }
 
-    // 🆕 Конфетти!
+    // Конфетти!
     private fun launchConfetti() {
         val party = Party(
             speed = 0f,
@@ -133,13 +133,13 @@ class HabitsFragment : Fragment() {
 
     private fun setupToggleGroup() {
         // По умолчанию активны ежедневные
-        binding.btnDaily.isChecked = true
+        binding.buttonDaily.isChecked = true
 
-        binding.toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+        binding.toggleHabits.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 when (checkedId) {
-                    binding.btnDaily.id -> showDaily()
-                    binding.btnWeekly.id -> showWeekly()
+                    binding.buttonDaily.id -> showDaily()
+                    binding.buttonWeekly.id -> showWeekly()
                 }
             }
         }

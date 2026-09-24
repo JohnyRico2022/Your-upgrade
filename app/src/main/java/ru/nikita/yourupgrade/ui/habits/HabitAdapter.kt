@@ -14,10 +14,9 @@ import ru.nikita.yourupgrade.databinding.ItemHabitBinding
 
 class HabitAdapter(
     private val onItemClick: (HabitUiItem) -> Unit,
-    private val onDeleteClick: (HabitUiItem) -> Unit,
-    private val onMarkDone: (HabitUiItem) -> Unit,      // 🆕 только отметка
-    private val onUnmarkDone: (HabitUiItem) -> Unit,    // 🆕 снятие отметки
-    private val onProgressClick: (HabitUiItem) -> Unit  // 🆕 для MEASURABLE
+    private val onMarkDone: (HabitUiItem) -> Unit,
+    private val onUnmarkDone: (HabitUiItem) -> Unit,
+    private val onProgressClick: (HabitUiItem) -> Unit
 ) : ListAdapter<HabitUiItem, HabitAdapter.HabitViewHolder>(HabitDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HabitViewHolder {
@@ -74,8 +73,6 @@ class HabitAdapter(
                         item.completedValue / item.targetValue
                     } else 0f
 
-                    Log.d("MyLog", "percent: $percent")
-
                     val progressColor = when {
                         percent == 0f -> 0xFF757575.toInt()        // серый (не начинал)
                         percent <= 0.5f -> 0xFFE53935.toInt()      // красный (0-50%)
@@ -90,7 +87,6 @@ class HabitAdapter(
                     when {
                         percent >= 1.0f -> binding.cardRoot.isSelected = true    // Зелёный
                         percent >= 0.5f -> binding.cardRoot.isActivated = true   // Жёлтый
-                        // else: оба false → белый
                     }
 
                     binding.tvProgress.setOnClickListener {

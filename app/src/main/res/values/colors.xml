@@ -2,13 +2,16 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-
+    <color name="light_yellow">#F4E5C0</color>
+    <color name="yellow">#E0B349</color>
+    <color name="main_gold">#D5A72D</color>
+    <color name="main_gold_light">#FFF3D6</color>
 
     <!--app background-->
-    <color name="bg_light_yellow">#F4E5C0</color>
+    <color name="bg_start_color">@color/white</color>
+    <color name="bg_end_color">@color/light_yellow</color>
 
-    <color name="yellow">#E0B349</color>
-
+    <color name="text_primary">@color/black</color>
 
     <color name="primary_green">#2E5A3C</color>
     <color name="text_secondary">#757575</color>

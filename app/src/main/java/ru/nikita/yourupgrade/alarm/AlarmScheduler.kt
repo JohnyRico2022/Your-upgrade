@@ -25,9 +25,51 @@ object AlarmScheduler {
         scheduleWeekSummary(context)
     }
 
-    /**
-     * 15:00 — мотивационное уведомление
-     */
+    // 🆕 Планируем с учётом настроек
+    fun scheduleAllWithPrefs(
+        context: Context,
+        prefs: ru.nikita.yourupgrade.util.PreferencesManager
+    ) {
+        if (prefs.isMotivationNotificationEnabled) scheduleMotivation(context)
+        else cancelMotivation(context)
+
+        if (prefs.isEveningNotificationEnabled) scheduleReminder(context)
+        else cancelReminder(context)
+
+        if (prefs.isWeeklyNotificationEnabled) scheduleWeekSummary(context)
+        else cancelWeekSummary(context)
+    }
+
+
+    // 🆕 Методы отмены
+    fun cancelMotivation(context: Context) {
+        cancelAlarm(context, REQUEST_MOTIVATION, AlarmReceiver.ACTION_MOTIVATION)
+    }
+
+    fun cancelReminder(context: Context) {
+        cancelAlarm(context, REQUEST_REMINDER, AlarmReceiver.ACTION_REMINDER)
+    }
+
+    fun cancelWeekSummary(context: Context) {
+        cancelAlarm(context, REQUEST_WEEK_SUMMARY, AlarmReceiver.ACTION_WEEK_SUMMARY)
+    }
+
+    private fun cancelAlarm(context: Context, requestCode: Int, action: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            this.action = action
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
+    }
+
+    // 15:00 — мотивационное уведомление
     fun scheduleMotivation(context: Context) {
         scheduleAlarm(
             context = context,
@@ -38,10 +80,8 @@ object AlarmScheduler {
         )
     }
 
-    /**
-     * 22:30 — напоминание отметить привычки
-     */
-     fun scheduleReminder(context: Context) {
+    // 22:30 — напоминание отметить привычки
+    fun scheduleReminder(context: Context) {
         scheduleAlarm(
             context = context,
             action = AlarmReceiver.ACTION_REMINDER,
@@ -51,9 +91,7 @@ object AlarmScheduler {
         )
     }
 
-    /**
-     * Универсальный метод планирования будильника
-     */
+    // Универсальный метод планирования будильника
     private fun scheduleAlarm(
         context: Context,
         action: String,
@@ -121,7 +159,7 @@ object AlarmScheduler {
         }
     }
 
-    // 🆕 Понедельник 8:30 — итоги недели
+    // Понедельник 8:30 — итоги недели
     fun scheduleWeekSummary(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
@@ -181,9 +219,6 @@ object AlarmScheduler {
         }
     }
 
-    /**
-     * Отменяет все будильники
-     */
     fun cancelAll(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         listOf(REQUEST_MOTIVATION, REQUEST_REMINDER).forEach { code ->

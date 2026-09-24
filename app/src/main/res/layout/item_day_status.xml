@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:gravity="center"
+    android:orientation="vertical"
     android:paddingHorizontal="12dp"
     android:paddingVertical="8dp">
 
@@ -12,17 +12,17 @@
         android:id="@+id/tvDayName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="ПН"
+        android:textColor="#757575"
         android:textSize="13sp"
-        android:textColor="#757575" />
+        tools:text="ПН" />
 
     <TextView
         android:id="@+id/tvStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:text="✓"
-        android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textSize="14sp"
+        android:textStyle="bold"
+        tools:text="✓" />
 
 </LinearLayout>

@@ -11,7 +11,7 @@
 
     <fragment
         android:id="@+id/habitDetailFragment"
-        android:name="ru.nikita.yourupgrade.ui.habits.HabitDetailFragment"
+        android:name="ru.nikita.yourupgrade.ui.habits_detail.HabitDetailFragment"
         android:label="Детали привычки">
         <argument
             android:name="habitId"
