@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.ui.stats
+package ru.nikita.yourupgrade.ui.history
 
 import android.os.Bundle
 import android.view.GestureDetector

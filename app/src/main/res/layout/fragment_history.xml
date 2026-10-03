@@ -144,7 +144,7 @@
                             android:layout_height="wrap_content"
                             android:orientation="vertical">
 
-                            <ru.nikita.yourupgrade.ui.stats.WeeklyBarChartView
+                            <ru.nikita.yourupgrade.ui.history.WeeklyBarChartView
                                 android:id="@+id/barChart"
                                 android:layout_width="match_parent"
                                 android:layout_height="160dp" />

@@ -29,10 +29,10 @@
             android:exported="false" />
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activities.MainActivity"
             android:exported="false" />
         <activity
-            android:name=".GreetingActivity"
+            android:name=".ui.activities.GreetingActivity"
             android:exported="true"
             android:theme="@style/Theme.App.Splash">
             <intent-filter>

@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade
+package ru.nikita.yourupgrade.ui.activities
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -14,6 +14,7 @@ import androidx.navigation.fragment.NavHostFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.alarm.PenaltyChecker
 import ru.nikita.yourupgrade.data.calculator.AchievementChecker
 import ru.nikita.yourupgrade.data.local.AppDatabase

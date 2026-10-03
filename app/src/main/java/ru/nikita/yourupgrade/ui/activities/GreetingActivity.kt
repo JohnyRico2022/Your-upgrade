@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade
+package ru.nikita.yourupgrade.ui.activities
 
 import android.content.Intent
 import android.os.Bundle

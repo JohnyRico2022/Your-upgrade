@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.ui.stats
+package ru.nikita.yourupgrade.ui.history
 
 import android.app.Application
 import android.util.Log
