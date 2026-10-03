@@ -1,6 +1,7 @@
 package ru.nikita.yourupgrade.data.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.nikita.yourupgrade.data.local.dao.AchievementDao
 import ru.nikita.yourupgrade.data.local.dao.CategoryDao
 import ru.nikita.yourupgrade.data.local.dao.HabitDao
 import ru.nikita.yourupgrade.data.local.dao.HabitLogDao
@@ -13,7 +14,8 @@ import ru.nikita.yourupgrade.data.model.LogStatus
 class HabitRepository(
     private val habitDao: HabitDao,
     private val categoryDao: CategoryDao,
-    private val habitLogDao: HabitLogDao
+    private val habitLogDao: HabitLogDao,
+    private val achievementDao: AchievementDao
 ) {
 
     fun getDailyHabits(): Flow<List<HabitEntity>> =
@@ -24,6 +26,9 @@ class HabitRepository(
 
     fun getAllCategories(): Flow<List<SkillCategoryEntity>> =
         categoryDao.getAllCategories()
+
+    suspend fun getAllCategoriesSync(): List<SkillCategoryEntity> =
+        categoryDao.getAllCategoriesSync()
 
     suspend fun insertHabit(habit: HabitEntity): Long =
         habitDao.insertHabit(habit)
@@ -83,4 +88,8 @@ class HabitRepository(
 
     suspend fun getHabitById(id: Long): HabitEntity? =
         habitDao.getHabitById(id)
+
+    suspend fun getTotalAchievementPoints(): Int? {
+        return achievementDao.getTotalAchievementPoints()
+    }
 }

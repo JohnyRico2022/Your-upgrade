@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.view.forEachIndexed
 import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.databinding.BottomMenuBinding
 
@@ -36,7 +37,8 @@ class BottomMenu @JvmOverloads constructor(
     }
 
     fun selectTab(position: Int) {
-        if (position == selectedPosition) return
+//       Пока убрал защиту от повторного нажатия
+//        if (position == selectedPosition) return
 
         tabs[selectedPosition].isActive = false
         tabs[position].isActive = true
@@ -44,9 +46,6 @@ class BottomMenu @JvmOverloads constructor(
         onTabSelected?.invoke(position)
     }
 
-    /**
-     * Вызывается из Fragment/Activity при программной навигации
-     */
     fun setActiveByFragment(fragmentId: Int) {
         val position = when (fragmentId) {
             R.id.habitsFragment -> 0
@@ -60,5 +59,14 @@ class BottomMenu @JvmOverloads constructor(
             tabs[position].isActive = true
             selectedPosition = position
         }
+    }
+
+    fun deActiveTab() {
+        tabs[0].isActive = false
+        tabs[1].isActive = false
+        tabs[2].isActive = false
+        tabs[3].isActive = false
+
+     //   selectedPosition = -1
     }
 }

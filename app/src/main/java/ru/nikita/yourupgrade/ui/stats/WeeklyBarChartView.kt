@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.ui.history
+package ru.nikita.yourupgrade.ui.stats
 
 import android.content.Context
 import android.graphics.Canvas

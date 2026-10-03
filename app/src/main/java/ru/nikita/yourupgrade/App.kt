@@ -5,6 +5,7 @@ import android.util.Log
 import ru.nikita.yourupgrade.alarm.AlarmScheduler
 import ru.nikita.yourupgrade.alarm.NotificationHelper
 import ru.nikita.yourupgrade.data.local.AppDatabase
+import ru.nikita.yourupgrade.util.FeedbackManager
 import ru.nikita.yourupgrade.util.PreferencesManager
 
 class App : Application() {
@@ -15,6 +16,8 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        FeedbackManager.init(this)
 
         try {
             database
@@ -28,5 +31,10 @@ class App : Application() {
         } catch (e: Exception) {
             Log.e("MyLog", "❌ App.onCreate CRASHED", e)
         }
+    }
+
+    override fun onTerminate() {
+        super.onTerminate()
+        FeedbackManager.release()
     }
 }

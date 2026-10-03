@@ -56,7 +56,7 @@ class InputValueDialogFragment : DialogFragment() {
             val imm =
                 requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
             imm.showSoftInput(binding.etValue, InputMethodManager.SHOW_IMPLICIT)
-        }, 100)
+        }, 200)
     }
 
     private fun setupListeners() {

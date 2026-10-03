@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.ui.history
+package ru.nikita.yourupgrade.ui.stats
 
 import android.os.Bundle
 import android.view.GestureDetector
@@ -204,12 +204,17 @@ class HistoryFragment : Fragment() {
                     val points = state.days.map { it.points }
                     binding.barChart.setData(points, state.selectedDayIndex)
 
-                    val totalText = if (state.totalPoints >= 0) {
-                        "+${String.format(Locale.getDefault(), "%.2f", state.totalPoints)}"
-                    } else {
-                        String.format(Locale.getDefault(), "%.2f", state.totalPoints)
-                    }
-                    binding.tvWeekTotal.text = totalText
+                    /* val totalText = if (state.totalPoints >= 0) {
+                         "+${String.format(Locale.getDefault(), "%.2f", state.totalPoints)}"
+                     } else {
+                         String.format(Locale.getDefault(), "%.2f", state.totalPoints)
+                     }*/
+
+
+                    binding.tvDailyPoints.text = formatPoints(state.dailyHabitsPoints)
+                    binding.tvWeeklyPoints.text = formatPoints(state.weeklyHabitsPoints)
+                    binding.tvAchievementPoints.text = "+${state.achievementPoints}"
+                    binding.tvWeekTotal.text = formatPoints(state.totalPoints)
 
                     val totalColor = if (state.totalPoints >= 0) {
                         0xFF4CAF50.toInt()
@@ -233,6 +238,14 @@ class HistoryFragment : Fragment() {
                     }
                 }
             }
+        }
+    }
+
+    private fun formatPoints(points: Float): String {
+        return if (points >= 0) {
+            "+${String.format(Locale.getDefault(), "%.2f", points)}"
+        } else {
+            String.format(Locale.getDefault(), "%.2f", points)
         }
     }
 

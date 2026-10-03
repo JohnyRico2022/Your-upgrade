@@ -12,7 +12,7 @@ data class HabitLogEntry(
     val date: String,  // "yyyy-MM-dd"
     val completedValue: Float = 1f,
     val earnedPoints: Float = 1f,
+    val targetValue: Float = 0f,     // 🆕 Цель на момент отметки
     val status: LogStatus = LogStatus.DONE,
     val timestamp: Long = System.currentTimeMillis()
 )
-

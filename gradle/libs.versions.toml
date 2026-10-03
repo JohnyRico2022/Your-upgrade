@@ -26,6 +26,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 
 konfetti = "2.0.4"
+remoteCreationCore = "1.0.0-alpha20"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -53,6 +54,7 @@ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecy
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 
 konfetti = { group = "nl.dionsegijn", name = "konfetti-xml", version.ref = "konfetti" }
+androidx-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

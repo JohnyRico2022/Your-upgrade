@@ -2,18 +2,25 @@ package ru.nikita.yourupgrade
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import ru.nikita.yourupgrade.alarm.PenaltyChecker
+import ru.nikita.yourupgrade.data.calculator.AchievementChecker
+import ru.nikita.yourupgrade.data.local.AppDatabase
+import ru.nikita.yourupgrade.data.local.entity.AchievementEntity
+import ru.nikita.yourupgrade.data.local.entity.AppUsageEntity
 import ru.nikita.yourupgrade.databinding.ActivityMainBinding
-import ru.nikita.yourupgrade.ui.common.BottomMenu
+import ru.nikita.yourupgrade.ui.rewards.AchievementDialogFragment
 import ru.nikita.yourupgrade.util.PreferencesManager
 
 class MainActivity : AppCompatActivity() {
@@ -33,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
         requestNotificationPermission()
         setupNavigation()
-
+        setupAchievements()
         PenaltyChecker.checkAndApplyPenalties(this)
     }
 
@@ -50,14 +57,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupNavigation() {
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.navHostFragment) as NavHostFragment
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.navHostFragment) as NavHostFragment
         val navController = navHostFragment.navController
 
-      //  binding.bottomNavigation.setupWithNavController(navController)
-
-        // 🆕 Следим за изменениями в навигации, чтобы управлять подсветкой
-        // Кастомный бар вместо BottomNavigationView
         binding.bottomNavigation.onTabSelected = { position ->
             val destinationId = when (position) {
                 0 -> R.id.habitsFragment
@@ -66,12 +69,14 @@ class MainActivity : AppCompatActivity() {
                 3 -> R.id.settingsFragment
                 else -> R.id.habitsFragment
             }
-            navController.navigate(destinationId, null, NavOptions.Builder()
-                .setPopUpTo(R.id.nav_graph, false)
-                .setLaunchSingleTop(true)
-                .build())
+            navController.navigate(
+                destinationId, null, NavOptions.Builder()
+                    .setPopUpTo(R.id.nav_graph, false)
+                    .setLaunchSingleTop(true)
+                    .build()
+            )
 
-
+            setFabActive(false)
         }
 
         // Синхронизация при навигации назад/вперёд
@@ -81,10 +86,66 @@ class MainActivity : AppCompatActivity() {
 
         // FAB
         binding.fabUser.setOnClickListener {
-            navController.navigate(R.id.userFragment, null, NavOptions.Builder()
-                .setPopUpTo(R.id.nav_graph, false)
-                .setLaunchSingleTop(true)
-                .build())
+            navController.navigate(
+                R.id.userFragment, null, NavOptions.Builder()
+                    .setPopUpTo(R.id.nav_graph, false)
+                    .setLaunchSingleTop(true)
+                    .build()
+            )
+
+            setFabActive(true)
+            binding.bottomNavigation.deActiveTab()
+        }
+
+        binding.bottomNavigation.selectTab(0)
+    }
+
+    private fun setFabActive(isActive: Boolean) {
+        val colorId: Int = if (isActive) android.R.color.white else android.R.color.black
+
+        binding.fabUser.imageTintList = ColorStateList.valueOf(
+            this.getColor(colorId)
+        )
+    }
+
+    private fun setupAchievements() {
+        backfillAppUsage()
+
+        AchievementChecker.checkAndGrantAchievements(this) { newAchievements ->
+            if (newAchievements.isNotEmpty()) {
+                showAchievementDialog(newAchievements)
+            }
         }
     }
+
+    private fun showAchievementDialog(achievements: List<AchievementEntity>) {
+        val dialog = AchievementDialogFragment().apply {
+            this.achievements = achievements
+        }
+        dialog.show(supportFragmentManager, "achievement")
+    }
+
+
+    private fun backfillAppUsage() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val db = AppDatabase.getDatabase(this@MainActivity)
+            val allLogs = db.habitLogDao().getAllLogsSync()  // или habitLogDao()
+
+            val uniqueDates = allLogs.map { it.date }.distinct()
+            var filledCount = 0
+
+            uniqueDates.forEach { date ->
+                val existing = db.appUsageDao().getUsageByDate(date)
+                if (existing == null) {
+                    db.appUsageDao().insertUsage(AppUsageEntity(date = date))
+                    filledCount++
+                }
+            }
+
+            if (filledCount > 0) {
+                Log.d("Backfill", "Добавлено $filledCount дней использования")
+            }
+        }
+    }
+
 }

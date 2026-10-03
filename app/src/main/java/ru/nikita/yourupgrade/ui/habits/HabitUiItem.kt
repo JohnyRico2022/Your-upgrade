@@ -12,7 +12,8 @@ data class HabitUiItem(
     val completionMode: CompletionMode,
     val targetValue: Float,
     val isDoneToday: Boolean = false,
-    val completedValue: Float = 0f  // 🆕 для измеримых
+    val completedValue: Float = 0f,
+    val unit: String
 ) {
     val targetLabel: String
         get() = when (completionMode) {

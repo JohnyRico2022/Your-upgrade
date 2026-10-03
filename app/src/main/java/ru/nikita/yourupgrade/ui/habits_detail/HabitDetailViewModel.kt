@@ -57,7 +57,12 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
     val weekOffset: StateFlow<Int> = _weekOffset.asStateFlow()
 
     init {
-        repository = HabitRepository(db.habitDao(), db.categoryDao(), db.habitLogDao())
+        repository = HabitRepository(
+            db.habitDao(),
+            db.categoryDao(),
+            db.habitLogDao(),
+            db.achievementDao()
+        )
     }
 
     fun setHabitId(id: Long) {

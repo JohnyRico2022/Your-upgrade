@@ -1,6 +1,7 @@
 package ru.nikita.yourupgrade.ui.user
 
 import android.app.Application
+import androidx.compose.remote.creation.toFloat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
@@ -24,7 +25,13 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val db = AppDatabase.getDatabase(application)
-        repository = HabitRepository(db.habitDao(), db.categoryDao(), db.habitLogDao())
+        repository = HabitRepository(
+            db.habitDao(),
+            db.categoryDao(),
+            db.habitLogDao(),
+            db.achievementDao()
+        )
+
 
         uiState = combine(
             repository.getAllCategories(),
@@ -38,7 +45,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    private fun buildUiState(
+    private suspend fun buildUiState(
         categories: List<SkillCategoryEntity>,
         logs: List<HabitLogEntry>,
         habits: List<HabitEntity>
@@ -59,17 +66,11 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         }
 
         // 🆕 Получаем очки за ачивки
-      //  val achievementPoints = db.achievementDao().getTotalAchievementPoints()?.toFloat() ?
+        val achievementPoints = repository.getTotalAchievementPoints()?.toFloat() ?: 0f
 
-        // 2. Общий прогресс
-       // val totalPoints = (pointsByCategory.values.sum() + achievementPoints).coerceAtLeast(0f)
-       // val level = PointsCalculator.getLevel(totalPoints)
-
-        // 2. Общий прогресс
-        val totalPoints = pointsByCategory.values.sum()
+        // Общий прогресс включает очки за ачивки
+        val totalPoints = (pointsByCategory.values.sum() + achievementPoints).coerceAtLeast(0f)
         val level = PointsCalculator.getLevel(totalPoints)
-//        val levelMin = PointsCalculator.getLevelMinPoints(level)
-//        val levelMax = PointsCalculator.getLevelMaxPoints(level)
 
         // 🆕 ПРЯМОЙ ПОДСЧЁТ: показываем реальные баллы / порог следующего уровня
         val nextLevelThreshold = PointsCalculator.getLevelMaxPoints(level)
@@ -83,7 +84,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         val progress = if (nextLevelThreshold > 0) {
             (totalPoints / nextLevelThreshold).coerceIn(0f, 1f)
         } else 1f
-
 
 
         // 3. Прогресс по категориям

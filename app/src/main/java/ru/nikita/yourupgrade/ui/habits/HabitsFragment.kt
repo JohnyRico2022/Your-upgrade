@@ -23,6 +23,7 @@ import ru.nikita.yourupgrade.databinding.FragmentHabitsBinding
 import java.util.concurrent.TimeUnit
 import androidx.navigation.fragment.findNavController
 import ru.nikita.yourupgrade.R
+import ru.nikita.yourupgrade.util.FeedbackManager
 
 class HabitsFragment : Fragment() {
 
@@ -65,11 +66,11 @@ class HabitsFragment : Fragment() {
             },
             onMarkDone = { habit ->
                 viewModel.toggleHabitCompletion(habit.id)
-                launchConfetti()  // 🆕 Конфетти при отметке!
+                launchConfetti()  // Конфетти при отметке!
+                FeedbackManager.onHabitMarked()  // Воспроизводим звук и вибрацию
             },
             onUnmarkDone = { habit ->
                 viewModel.toggleHabitCompletion(habit.id)
-                // Без конфетти при снятии
             },
             onProgressClick = { habit -> showInputValueDialog(habit) }
         )
@@ -97,7 +98,6 @@ class HabitsFragment : Fragment() {
         binding.rvWeeklyHabits.adapter = weeklyAdapter
     }
 
-    // Конфетти!
     private fun launchConfetti() {
         val party = Party(
             speed = 0f,
@@ -124,8 +124,8 @@ class HabitsFragment : Fragment() {
 
             this.onValueEntered = { value ->
                 viewModel.saveMeasurableValue(habit.id, value)
-
-                launchConfetti()
+                launchConfetti()  // конфетти
+                FeedbackManager.onHabitMarked() // Воспроизводим звук и вибрацию
             }
         }
         dialog.show(childFragmentManager, "input_value")
@@ -162,11 +162,19 @@ class HabitsFragment : Fragment() {
     }
 
     private fun showAddDialog() {
-        val dialog = AddHabitDialogFragment()
-        dialog.onHabitCreated = { name, categoryId, type, completionMode, target ->
-            viewModel.addHabit(name, categoryId, type, completionMode, target)
+        viewLifecycleOwner.lifecycleScope.launch {
+            // Загружаем категории перед показом диалога
+            val categories = viewModel.getCategories()
+
+            val dialog = AddHabitDialogFragment().apply {
+                setCategories(categories)  // 🆕 Передаём категории
+
+                onHabitCreated = { name, categoryId, type, mode, target, unit ->
+                    viewModel.addHabit(name, categoryId, type, mode, target, unit)
+                }
+            }
+            dialog.show(childFragmentManager, "add_habit")
         }
-        dialog.show(childFragmentManager, "add_habit")
     }
 
     private fun observeData() {
@@ -229,7 +237,8 @@ class HabitsFragment : Fragment() {
                 completionMode = habit.completionMode,
                 targetValue = habit.targetValue,
                 isDoneToday = isDone,
-                completedValue = completedValue
+                completedValue = completedValue,
+                unit = habit.unit
             )
         }
 

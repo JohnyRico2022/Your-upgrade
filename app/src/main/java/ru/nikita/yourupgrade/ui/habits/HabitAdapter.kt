@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.databinding.ItemHabitBinding
+import ru.nikita.yourupgrade.util.UnitsHelper
 
 class HabitAdapter(
     private val onItemClick: (HabitUiItem) -> Unit,
@@ -66,7 +67,13 @@ class HabitAdapter(
                 CompletionMode.MEASURABLE -> {
                     binding.imageDone.visibility = View.GONE
                     binding.tvProgress.visibility = View.VISIBLE
-                    binding.tvProgress.text = item.progressLabel
+                    //  binding.tvProgress.text = item.progressLabel
+                    // 🆕 Форматируем с единицей измерения
+                    binding.tvProgress.text = UnitsHelper.formatProgress(
+                        completed = item.completedValue,
+                        target = item.targetValue,
+                        unit = item.unit
+                    )
 
                     // Цвет в зависимости от процента
                     val percent = if (item.targetValue > 0) {

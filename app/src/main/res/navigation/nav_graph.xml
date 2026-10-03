@@ -21,7 +21,7 @@
 
     <fragment
         android:id="@+id/historyFragment"
-        android:name="ru.nikita.yourupgrade.ui.history.HistoryFragment"
+        android:name="ru.nikita.yourupgrade.ui.stats.HistoryFragment"
         android:label="История" />
 
     <fragment

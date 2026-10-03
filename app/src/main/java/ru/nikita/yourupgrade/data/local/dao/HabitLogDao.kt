@@ -2,6 +2,7 @@ package ru.nikita.yourupgrade.data.local.dao
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
+import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 
 @Dao
@@ -27,6 +28,9 @@ interface HabitLogDao {
 
     @Query("SELECT * FROM habit_logs")
     fun getAllLogs(): Flow<List<HabitLogEntry>>
+
+    @Query("SELECT * FROM habit_logs")
+    suspend fun getAllLogsSync(): List<HabitLogEntry>
 
     @Query("UPDATE habit_logs SET completedValue = :value, earnedPoints = :points WHERE habitId = :habitId AND date = :date")
     suspend fun updateLog(habitId: Long, date: String, value: Float, points: Float)

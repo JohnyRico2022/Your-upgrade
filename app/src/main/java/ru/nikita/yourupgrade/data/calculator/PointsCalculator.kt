@@ -1,16 +1,28 @@
 package ru.nikita.yourupgrade.data.calculator
 
+import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import kotlin.math.roundToInt
 
 object PointsCalculator {
 
-    // Уровни: 0-30 (L1), 30-100 (L2), 100-250 (L3), 250-500 (L4), 500-1000 (L5)
     private val LEVEL_THRESHOLDS = listOf(0f, 30f, 100f, 250f, 500f, 1000f)
 
     /**
      * Рассчитывает баллы за выполнение привычки
      */
+
+    // 🆕 Новая версия: принимает цель из лога
+    fun calculatePointsFromLog(log: HabitLogEntry, completionMode: CompletionMode): Float {
+        return calculatePoints(
+            completedValue = log.completedValue,
+            targetValue = log.targetValue,
+            completionMode = completionMode
+        )
+    }
+
+
+    // Старая версия для новых записей
     fun calculatePoints(
         completionMode: CompletionMode,
         completedValue: Float,

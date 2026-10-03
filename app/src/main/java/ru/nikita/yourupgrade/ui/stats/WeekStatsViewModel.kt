@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.ui.history
+package ru.nikita.yourupgrade.ui.stats
 
 import android.app.Application
 import android.util.Log
@@ -20,6 +20,7 @@ import ru.nikita.yourupgrade.data.model.HabitType
 
 class WeekStatsViewModel(application: Application) : AndroidViewModel(application) {
 
+    //todo нужно через репозиторий
     private val db = AppDatabase.getDatabase(application)
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
@@ -84,15 +85,6 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
         // Получаем все привычки
         val allHabits = db.habitDao().getAllHabitsSync()
         val dailyHabits = allHabits.filter { it.type == HabitType.DAILY && it.isActive }
-
-
-        // 🆕 ЛОГИ: сколько всего привычек и сколько ежедневных
-        android.util.Log.d("MyLog", "=== buildWeekStats ===")
-        android.util.Log.d("MyLog", "Всего привычек в БД: ${allHabits.size}")
-        android.util.Log.d("MyLog", "Ежедневных активных: ${dailyHabits.size}")
-        android.util.Log.d("MyLog", "Не ежедневные/неактивные: ${allHabits.size - dailyHabits.size}")
-
-
 
         // Получаем категории
         val categories = db.categoryDao().getAllCategoriesSync()
@@ -164,13 +156,31 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
 
         val totalPoints = days.sumOf { it.points.toDouble() }.toFloat()
 
+        val dailyHabitsIds = allHabits.filter { it.type == HabitType.DAILY }.map { it.id }.toSet()
+        val weeklyHabitsIds = allHabits.filter { it.type == HabitType.WEEKLY }.map { it.id }.toSet()
+
+        var dailyPoints = 0f
+        var weeklyPoints = 0f
+
+        for (log in weekLogs) {
+            when {
+                log.habitId in dailyHabitsIds -> dailyPoints += log.earnedPoints
+                log.habitId in weeklyHabitsIds -> weeklyPoints += log.earnedPoints
+            }
+        }
+
+        val achievementPoints = db.achievementDao().getPointsForDateRange(weekStartStr, weekEndStr)
+
         return WeekStatsUiState(
             weekNumber = weekNumber,
             weekStart = weekStart,
             weekEnd = weekEnd,
             days = days,
             totalPoints = totalPoints,
-            selectedDayIndex = -1
+            selectedDayIndex = -1,
+            dailyHabitsPoints = dailyPoints,
+            weeklyHabitsPoints = weeklyPoints,
+            achievementPoints = achievementPoints
         )
     }
 }

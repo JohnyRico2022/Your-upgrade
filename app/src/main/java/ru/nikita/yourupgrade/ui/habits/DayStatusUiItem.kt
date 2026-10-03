@@ -14,6 +14,7 @@ data class DayStatusUiItem(
 
     // Для совместимости можно оставить свойство
     val isDone: Boolean get() = status == DayCompletionStatus.DONE
+
     val statusLabel: String
         get() = when (completionMode) {
             CompletionMode.CHECKABLE -> if (isDone) "✓" else "–"

@@ -1,4 +1,4 @@
-package ru.nikita.yourupgrade.ui.history
+package ru.nikita.yourupgrade.ui.stats
 
 import java.time.LocalDate
 
@@ -29,7 +29,10 @@ data class WeekStatsUiState(
     val weekEnd: LocalDate = LocalDate.now(),
     val days: List<DayStats> = emptyList(),
     val totalPoints: Float = 0f,
-    val selectedDayIndex: Int = -1
+    val selectedDayIndex: Int = -1,
+    val dailyHabitsPoints: Float = 0f,
+    val weeklyHabitsPoints: Float = 0f,
+    val achievementPoints: Int = 0
 ) {
     val selectedDay: DayStats?
         get() = if (selectedDayIndex in days.indices) days[selectedDayIndex] else null

@@ -39,7 +39,12 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
 
     init {
         val db = AppDatabase.getDatabase(application)
-        repository = HabitRepository(db.habitDao(), db.categoryDao(), db.habitLogDao())
+        repository = HabitRepository(
+            db.habitDao(),
+            db.categoryDao(),
+            db.habitLogDao(),
+            db.achievementDao()
+        )
 
         dailyHabits = repository.getDailyHabits()
         weeklyHabits = repository.getWeeklyHabits()
@@ -109,7 +114,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
         categoryId: Long,
         type: HabitType,
         completionMode: CompletionMode,
-        targetValue: Float
+        targetValue: Float,
+        unit: String
     ) {
         viewModelScope.launch {
             val habit = HabitEntity(
@@ -117,7 +123,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                 categoryId = categoryId,
                 type = type,
                 completionMode = completionMode,
-                targetValue = if (completionMode == CompletionMode.CHECKABLE) 1f else targetValue
+                targetValue = if (completionMode == CompletionMode.CHECKABLE) 1f else targetValue,
+                unit = unit
             )
             repository.insertHabit(habit)
         }
@@ -126,6 +133,73 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
     fun deleteHabit(id: Long) {
         viewModelScope.launch {
             repository.deleteHabit(id)
+        }
+    }
+
+    suspend fun getCategories(): List<SkillCategoryEntity> {
+        return repository.getAllCategoriesSync()
+    }
+
+
+    fun markHabitDone(habitId: Long) {
+        viewModelScope.launch {
+
+            val habit = repository.getHabitById(habitId) ?: return@launch
+            val today = LocalDate.now().format(dateFormatter)
+
+            val existingLog = repository.getLogForHabitAndDate(habitId, today)
+            if (existingLog != null) return@launch
+
+            val points = PointsCalculator.calculatePoints(
+                completedValue = 1f,
+                targetValue = habit.targetValue,
+                completionMode = habit.completionMode
+            )
+
+            val log = HabitLogEntry(
+                habitId = habitId,
+                date = today,
+                completedValue = 1f,
+                targetValue = habit.targetValue,  // 🆕 Фиксируем цель
+                earnedPoints = points,
+                status = LogStatus.DONE
+            )
+            repository.insertLog(log)
+        }
+    }
+
+    fun setProgress(habitId: Long, value: Float) {
+        viewModelScope.launch {
+            val habit = repository.getHabitById(habitId) ?: return@launch
+            val today = LocalDate.now().format(dateFormatter)
+
+            val existingLog = repository.getLogForHabitAndDate(habitId, today)
+
+            val points = PointsCalculator.calculatePoints(
+                completedValue = value,
+                targetValue = habit.targetValue,
+                completionMode = habit.completionMode
+            )
+
+            if (existingLog != null) {
+                // Обновляем существующий лог, но НЕ меняем targetValue
+                /* val updated = existingLog.copy(
+                     completedValue = value,
+                     earnedPoints = points
+                     // targetValue остаётся прежним!
+                 )
+                 repository.updateLog(updated)*/
+            } else {
+                val log = HabitLogEntry(
+                    habitId = habitId,
+                    date = today,
+                    completedValue = value,
+                    targetValue = habit.targetValue,  // 🆕 Фиксируем цель при создании
+                    earnedPoints = points,
+                    status = if (points >= 0) LogStatus.DONE else LogStatus.MISSED
+                )
+                repository.insertLog(log)
+            }
         }
     }
 }

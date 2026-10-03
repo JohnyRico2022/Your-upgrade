@@ -40,7 +40,7 @@ class BottomMenuItem @JvmOverloads constructor(
         val tintColor = if (isActive) {
             context.getColor(R.color.white)
         } else {
-            context.getColor(R.color.text_secondary)
+            context.getColor(R.color.black)
         }
 
         binding.icon.setColorFilter(tintColor)
