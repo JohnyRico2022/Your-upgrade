@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_app_gradient">
@@ -15,7 +16,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Настройки"
+            android:text="@string/settings_title"
             android:textColor="@color/text_primary"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -41,12 +42,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
-                    android:text="Уведомления"
+                    android:text="@string/settings_notifications_title"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- Мотивационное уведомление -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -63,7 +63,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Мотивационное"
+                            android:text="@string/settings_notification_motivation_title"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -71,7 +71,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Каждый день в 15:00"
+                            android:text="@string/settings_notification_motivation_subtitle"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
 
@@ -86,7 +86,6 @@
 
                 </LinearLayout>
 
-                <!-- Вечернее уведомление -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -103,7 +102,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Вечернее"
+                            android:text="@string/settings_notification_evening_title"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -111,7 +110,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Каждый день в 22:30"
+                            android:text="@string/settings_notification_evening_subtitle"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
 
@@ -126,7 +125,6 @@
 
                 </LinearLayout>
 
-                <!-- Недельное уведомление -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -143,7 +141,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Итоги недели"
+                            android:text="@string/settings_notification_weekly_title"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -151,7 +149,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Понедельник в 8:30"
+                            android:text="@string/settings_notification_weekly_subtitle"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
 
@@ -170,7 +168,7 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 🆕 Карточка 2: Звуки и вибрация -->
+        <!-- Звуки и вибрация -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -191,12 +189,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
-                    android:text="Звуки и вибрация"
+                    android:text="@string/settings_sound_section_title"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- Звуковые эффекты -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -213,7 +210,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Звуковые эффекты"
+                            android:text="@string/settings_sound_effects_title"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -221,7 +218,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Звук при отметке привычки"
+                            android:text="@string/settings_sound_effects_subtitle"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
 
@@ -236,7 +233,6 @@
 
                 </LinearLayout>
 
-                <!-- Вибрация -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -253,7 +249,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Вибрация"
+                            android:text="@string/settings_vibration_title"
                             android:textColor="@color/text_primary"
                             android:textSize="15sp" />
 
@@ -261,7 +257,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="2dp"
-                            android:text="Вибрация при отметке привычки"
+                            android:text="@string/settings_vibration_subtitle"
                             android:textColor="@color/text_secondary"
                             android:textSize="13sp" />
 
@@ -280,8 +276,9 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 🆕 Карточка 3: Тема -->
-        <com.google.android.material.card.MaterialCardView
+        <!--  Тема -->
+        <!--  Пока убрал. Верну в следующих релизах -->
+        <!--<com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -344,9 +341,57 @@
 
             </LinearLayout>
 
+        </com.google.android.material.card.MaterialCardView>-->
+
+        <!-- 🆕 Карточка 5: Категории -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="@android:color/white"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:text="@string/settings_categories_title"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:id="@+id/categoriesContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="vertical" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddCategory"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/settings_add_category"
+                    android:textColor="@color/main_gold"
+                    app:cornerRadius="12dp"
+                    app:strokeColor="@color/main_gold" />
+
+            </LinearLayout>
+
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 🆕 Карточка 4: О приложении -->
+        <!-- О приложении -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -367,7 +412,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="О приложении"
+                    android:text="@string/settings_about_title"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -377,15 +422,15 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Версия 1.0.0"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:text="Версия 1.0.0" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="made on Kotlin with ❤️"
+                    android:text="@string/settings_made_with"
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp"
                     android:textStyle="italic" />

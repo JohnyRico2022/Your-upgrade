@@ -67,15 +67,12 @@ class HabitAdapter(
                 CompletionMode.MEASURABLE -> {
                     binding.imageDone.visibility = View.GONE
                     binding.tvProgress.visibility = View.VISIBLE
-                    //  binding.tvProgress.text = item.progressLabel
-                    // 🆕 Форматируем с единицей измерения
                     binding.tvProgress.text = UnitsHelper.formatProgress(
                         completed = item.completedValue,
                         target = item.targetValue,
                         unit = item.unit
                     )
 
-                    // Цвет в зависимости от процента
                     val percent = if (item.targetValue > 0) {
                         item.completedValue / item.targetValue
                     } else 0f
@@ -97,6 +94,7 @@ class HabitAdapter(
                     }
 
                     binding.tvProgress.setOnClickListener {
+                        Log.d("MyLog", "Кликнули по привычке в адаптере ")
                         onProgressClick(item)
                     }
                 }

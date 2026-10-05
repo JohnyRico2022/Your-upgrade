@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_app_gradient">
@@ -11,7 +12,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 🆕 Карточка 1: Информация о привычке -->
+        <!-- Информация о привычке -->
         <com.google.android.material.card.MaterialCardView
             style="@style/AppCard"
             android:layout_width="match_parent"
@@ -25,7 +26,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Название + меню -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -37,10 +37,10 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Витамин D"
                         android:textColor="@color/black"
                         android:textSize="22sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="Витамин D" />
 
                     <ImageButton
                         android:id="@+id/btnMenu"
@@ -53,37 +53,34 @@
 
                 </LinearLayout>
 
-                <!-- Разделитель внутри карточки -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginVertical="12dp"
                     android:background="#E0E0E0" />
 
-                <!-- Категория и тип -->
                 <TextView
                     android:id="@+id/tvCategoryInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="💊 Здоровье • Ежедневно"
                     android:textColor="@color/text_secondary"
-                    android:textSize="15sp" />
+                    android:textSize="15sp"
+                    tools:text="💊 Здоровье • Ежедневно" />
 
-                <!-- Тип и цель -->
                 <TextView
                     android:id="@+id/tvTargetInfo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Отмечаемая привычка"
                     android:textColor="@color/text_secondary"
-                    android:textSize="14sp" />
+                    android:textSize="14sp"
+                    tools:text="Отмечаемая привычка" />
 
             </LinearLayout>
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 🆕 Карточка 2: Текущая неделя -->
+        <!-- Текущая неделя -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardWeek"
             style="@style/AppCard"
@@ -101,17 +98,15 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Заголовок карточки -->
                 <TextView
                     android:id="@+id/tvWeekTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Текущая неделя"
                     android:textColor="@color/black"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    tools:text="Текущая неделя" />
 
-                <!-- Горизонтальный список дней -->
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rvWeekDays"
                     android:layout_width="match_parent"
@@ -120,14 +115,12 @@
                     android:clipToPadding="false"
                     android:overScrollMode="never" />
 
-                <!-- Разделитель -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:layout_marginVertical="12dp"
                     android:background="#E0E0E0" />
 
-                <!-- Статистика -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -138,10 +131,10 @@
                         android:id="@+id/tvWeekSummary"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="5 из 7 дней"
                         android:textColor="@color/main_gold"
                         android:textSize="13sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        tools:text="5 из 7 дней" />
 
                 </LinearLayout>
 

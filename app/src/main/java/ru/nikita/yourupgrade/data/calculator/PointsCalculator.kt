@@ -2,6 +2,7 @@ package ru.nikita.yourupgrade.data.calculator
 
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.model.CompletionMode
+import ru.nikita.yourupgrade.data.model.HabitType
 import kotlin.math.roundToInt
 
 object PointsCalculator {
@@ -12,54 +13,76 @@ object PointsCalculator {
      * Рассчитывает баллы за выполнение привычки
      */
 
-    // 🆕 Новая версия: принимает цель из лога
-    fun calculatePointsFromLog(log: HabitLogEntry, completionMode: CompletionMode): Float {
-        return calculatePoints(
-            completedValue = log.completedValue,
-            targetValue = log.targetValue,
-            completionMode = completionMode
-        )
-    }
+    /* fun calculatePointsFromLog(log: HabitLogEntry, completionMode: CompletionMode): Float {
+         return calculatePoints(
+             completedValue = log.completedValue,
+             targetValue = log.targetValue,
+             completionMode = completionMode
+         )
+     }*/
 
 
     // Старая версия для новых записей
     fun calculatePoints(
         completionMode: CompletionMode,
         completedValue: Float,
-        targetValue: Float
+        targetValue: Float,
+        habitType: HabitType
+    ): Float {
+        return when (habitType) {
+            HabitType.DAILY -> calculateDailyPoints(completedValue, targetValue, completionMode)
+            HabitType.WEEKLY -> calculateWeeklyPoints(completedValue, targetValue, completionMode)
+        }
+    }
+
+    private fun calculateDailyPoints(
+        completedValue: Float,
+        targetValue: Float,
+        completionMode: CompletionMode
     ): Float {
         return when (completionMode) {
             CompletionMode.CHECKABLE -> {
-                // Отмечаемая: 1.0 балл если выполнено
-                if (completedValue > 0f) 1.0f else 0f
+                if (completedValue >= 1f) 1.0f else 0f
             }
 
             CompletionMode.MEASURABLE -> {
-                // Измеряемая: пропорционально, но минимум 50% для зачёта
-                if (targetValue <= 0f) return 0f
-
-                val percent = completedValue / targetValue
-
-                if (percent < 0.5f) {
-                    0f  // менее 50% — не засчитываем
-                } else {
-                    // от 50% до 100%: шкала 0.5 → 1.0
-                    // формула: 0.5 + 0.5 * (percent)
-                    val rawPoints = 0.5f + 0.5f * percent
-                    // Ограничиваем сверху 1.0 (если перевыполнил — больше не даём пока)
-                    val capped = rawPoints.coerceAtMost(1.0f)
-                    // Округление до 2 знаков
-                    roundTo2Decimals(capped)
+                val percent = if (targetValue > 0) completedValue / targetValue else 0f
+                when {
+                    percent >= 1.0f -> 1.0f
+                    percent >= 0.5f -> 0.5f
+                    else -> -0.25f       // Штраф за пропуск
                 }
             }
         }
     }
 
-    /**
-     * Определяет текущий уровень по сумме баллов
-     */
+    private fun calculateWeeklyPoints(
+        completedValue: Float,
+        targetValue: Float,
+        completionMode: CompletionMode
+    ): Float {
+        return when (completionMode) {
+            CompletionMode.CHECKABLE -> {
+                // Отмечаемая: 2 балла за выполнение
+                if (completedValue >= 1f) 2.0f else 0f
+            }
+
+            CompletionMode.MEASURABLE -> {
+                // Измеряемая: пропорционально
+                val percent = if (targetValue > 0) completedValue / targetValue else 0f
+                when {
+                    percent >= 1.0f -> 2.0f      // 100% → 2 балла
+                    percent >= 0.5f -> 1.0f      // 50-99% → 1 балл
+                    else -> -0.25f              // Штраф за пропуск
+                }
+            }
+        }
+    }
+
+
+    /** Определяет текущий уровень по сумме баллов */
     fun getLevel(totalPoints: Float): Int {
-        val safePoints = totalPoints.coerceAtLeast(0f)  // 🆕 не ниже нуля
+        val safePoints = totalPoints.coerceAtLeast(0f)
         return when {
             safePoints < LEVEL_THRESHOLDS[1] -> 1
             safePoints < LEVEL_THRESHOLDS[2] -> 2
@@ -70,9 +93,7 @@ object PointsCalculator {
         }
     }
 
-    /**
-     * Нижняя граница текущего уровня
-     */
+    /** Нижняя граница текущего уровня */
     fun getLevelMinPoints(level: Int): Float {
         return LEVEL_THRESHOLDS.getOrElse(level - 1) { 0f }
     }
@@ -90,14 +111,15 @@ object PointsCalculator {
     fun getMotivationQuote(level: Int): String {
         return when (level) {
             1 -> "Каждый шаг вперёд — это победа!"
-            2 -> "Вы уже в пути, не останавливайтесь!"
+            2 -> "Ты уже в пути, не останавливайся!"
             3 -> "Привычки становятся частью вас!"
             4 -> "Мастерство требует постоянства!"
-            5 -> "Вы достигли вершины, но нет предела совершенства!"
+            5 -> "Ты на вершине, но нет предела совершенства!"
             else -> "Начните свой путь"
         }
     }
 
+    //todo в Utils
     private fun roundTo2Decimals(value: Float): Float {
         return ((value * 100f).roundToInt() / 100f)
     }

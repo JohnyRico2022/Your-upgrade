@@ -15,7 +15,7 @@ data class HabitEntity(
     val completionMode: CompletionMode = CompletionMode.CHECKABLE,
     val targetValue: Float = 1f,
     val weeklyTarget: Int = 1,
-    val unit: String = "",           // 🆕 Единица измерения
+    val unit: String = "",
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis()
 )

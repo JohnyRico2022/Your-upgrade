@@ -1,7 +1,6 @@
 package ru.nikita.yourupgrade.ui.rewards
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -12,7 +11,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ru.nikita.yourupgrade.data.local.AppDatabase
 import ru.nikita.yourupgrade.data.model.AchievementType
-import ru.nikita.yourupgrade.data.model.HabitType
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -45,7 +43,7 @@ class RewardsViewModel(application: Application) : AndroidViewModel(application)
 
     private suspend fun buildRewardsState(): RewardsUiState {
         val allHabits = db.habitDao().getAllHabitsSync()
-        val dailyHabits = allHabits.filter { it.type == HabitType.DAILY && it.isActive }
+        val dailyHabits = allHabits.filter { it.isActive }
 
         // 🆕 Проверяем количество привычек
         if (dailyHabits.size < MIN_HABITS_FOR_ACHIEVEMENTS) {
@@ -61,19 +59,6 @@ class RewardsViewModel(application: Application) : AndroidViewModel(application)
         val totalPoints = db.achievementDao().getTotalAchievementPoints() ?: 0
         val allLogs = db.habitLogDao().getAllLogsSync()
         val totalUsageDays = db.appUsageDao().getTotalUsageDays()
-
-
-// 🆕 ЛОГ: все ачивки в БД
-        Log.d("MyLog", "=== Все ачивки в БД ===")
-        Log.d("MyLog", "Всего ачивок: ${achievements.size}, Очков: $totalPoints")
-        achievements.forEachIndexed { index, a ->
-            Log.d(
-                "MyLog",
-                "[$index] type=${a.type.name}, level=${a.level}, points=${a.points}, habitId=${a.habitId}, date=${a.earnedDate}"
-            )
-        }
-        Log.d("MyLog", "=========================")
-
 
         val categories = mutableListOf<AchievementCategoryUi>()
 

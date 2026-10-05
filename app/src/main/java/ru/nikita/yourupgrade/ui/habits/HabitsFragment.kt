@@ -1,6 +1,7 @@
 package ru.nikita.yourupgrade.ui.habits
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -66,7 +67,7 @@ class HabitsFragment : Fragment() {
             },
             onMarkDone = { habit ->
                 viewModel.toggleHabitCompletion(habit.id)
-                launchConfetti()  // Конфетти при отметке!
+                launchConfetti()                 // Конфетти при отметке!
                 FeedbackManager.onHabitMarked()  // Воспроизводим звук и вибрацию
             },
             onUnmarkDone = { habit ->
@@ -86,9 +87,15 @@ class HabitsFragment : Fragment() {
                     bundle
                 )
             },
-            onMarkDone = { /* для еженедельных позже */ },
-            onUnmarkDone = { /* для еженедельных позже */ },
-            onProgressClick = { /* для еженедельных позже */ }
+            onMarkDone = {habit ->
+                viewModel.toggleHabitCompletion(habit.id)
+                launchConfetti()                 // Конфетти при отметке!
+                FeedbackManager.onHabitMarked()  // Воспроизводим звук и вибрацию
+            },
+            onUnmarkDone = { habit ->
+                viewModel.toggleHabitCompletion(habit.id)
+            },
+            onProgressClick = { habit -> showInputValueDialog(habit) }
         )
 
         binding.rvDailyHabits.layoutManager = LinearLayoutManager(requireContext())
@@ -117,6 +124,8 @@ class HabitsFragment : Fragment() {
 
 
     private fun showInputValueDialog(habit: HabitUiItem) {
+
+        Log.d("MyLog", "в диалоге ")
         val dialog = InputValueDialogFragment().apply {
             this.habitName = habit.name
             this.targetValue = habit.targetValue

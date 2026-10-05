@@ -9,5 +9,6 @@ data class SkillCategoryEntity(
     val id: Long = 0,
     val name: String,
     val weight: Float = 1.0f,
-    val iconEmoji: String = "📌"
+    val iconEmoji: String = "📌",
+    val isUserCreated: Boolean = false
 )

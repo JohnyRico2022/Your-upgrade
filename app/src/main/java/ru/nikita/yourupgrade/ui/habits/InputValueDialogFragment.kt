@@ -31,9 +31,7 @@ class InputValueDialogFragment : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Убираем стандартный фон диалога
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
-
         setupUI()
         setupListeners()
     }

@@ -13,12 +13,17 @@ interface CategoryDao {
     @Query("SELECT * FROM categories ORDER BY id")
     fun getAllCategories(): Flow<List<SkillCategoryEntity>>
 
+    @Query("SELECT * FROM categories ORDER BY id")
+    suspend fun getAllCategoriesSync(): List<SkillCategoryEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertCategories(categories: List<SkillCategoryEntity>)
+    suspend fun insertCategory(categories: SkillCategoryEntity)
 
     @Query("SELECT * FROM categories WHERE id = :id")
     suspend fun getCategoryById(id: Long): SkillCategoryEntity?
 
-    @Query("SELECT * FROM categories ORDER BY id")
-    suspend fun getAllCategoriesSync(): List<SkillCategoryEntity>
+    // Удаление категории.
+    //todo Нужно подумать над использованием
+    @Query("DELETE FROM categories WHERE id = :id")
+    suspend fun deleteCategory(id: Long)
 }

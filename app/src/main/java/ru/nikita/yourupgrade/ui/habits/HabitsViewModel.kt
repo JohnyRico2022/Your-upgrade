@@ -51,7 +51,7 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
         categories = repository.getAllCategories()
     }
 
-    // 🆕 Для CHECKABLE: переключение галочки
+    /** Для CHECKABLE: переключение галочки */
     fun toggleHabitCompletion(habitId: Long) {
         viewModelScope.launch {
             val dateStr = _selectedDate.value.format(dateFormatter)
@@ -65,7 +65,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                 val points = PointsCalculator.calculatePoints(
                     habit.completionMode,
                     completedValue = 1f,
-                    targetValue = habit.targetValue
+                    targetValue = habit.targetValue,
+                    habitType = habit.type
                 )
                 repository.markHabitDone(habitId, dateStr, points)
             }
@@ -86,7 +87,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
             val points = PointsCalculator.calculatePoints(
                 habit.completionMode,
                 completedValue = value,
-                targetValue = habit.targetValue
+                targetValue = habit.targetValue,
+                habitType = habit.type
             )
 
             // 🆕 Проверяем, есть ли уже запись за сегодня
@@ -153,7 +155,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
             val points = PointsCalculator.calculatePoints(
                 completedValue = 1f,
                 targetValue = habit.targetValue,
-                completionMode = habit.completionMode
+                completionMode = habit.completionMode,
+                habitType = habit.type
             )
 
             val log = HabitLogEntry(
@@ -178,7 +181,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
             val points = PointsCalculator.calculatePoints(
                 completedValue = value,
                 targetValue = habit.targetValue,
-                completionMode = habit.completionMode
+                completionMode = habit.completionMode,
+                habitType = habit.type
             )
 
             if (existingLog != null) {

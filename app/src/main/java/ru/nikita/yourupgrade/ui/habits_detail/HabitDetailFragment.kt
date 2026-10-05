@@ -18,6 +18,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.databinding.FragmentHabitDetailBinding
@@ -27,7 +28,6 @@ class HabitDetailFragment : Fragment() {
 
     private var _binding: FragmentHabitDetailBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: HabitDetailViewModel by viewModels()
     private lateinit var dayAdapter: DayStatusAdapter
     private lateinit var gestureDetector: GestureDetector
@@ -44,6 +44,7 @@ class HabitDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        //todo вынести в ключи
         val habitId = arguments?.getLong("habitId", -1L) ?: -1L
         if (habitId == -1L) {
             parentFragmentManager.popBackStack()
@@ -53,7 +54,7 @@ class HabitDetailFragment : Fragment() {
         viewModel.setHabitId(habitId)
 
         setupWeekRecyclerView()
-        setupSwipeGestures()  // 🆕
+        setupSwipeGestures()
         observeData()
     }
 
@@ -67,8 +68,6 @@ class HabitDetailFragment : Fragment() {
         binding.rvWeekDays.adapter = dayAdapter
     }
 
-
-    // 🆕 Настройка свайпов на карточку недели
     private fun setupSwipeGestures() {
         gestureDetector =
             GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
@@ -125,14 +124,21 @@ class HabitDetailFragment : Fragment() {
                         }
 
                         /** Категория */
-                        val typeLabel =
-                            if (habit.type == HabitType.DAILY) "Ежедневно" else "Еженедельно"
+                        val typeLabel = when (habit.type) {
+                            HabitType.DAILY -> getString(R.string.habit_detail_type_daily)
+                            HabitType.WEEKLY -> getString(R.string.habit_detail_type_weekly)
+                        }
                         binding.tvCategoryInfo.text = typeLabel
 
                         /** Цель */
                         binding.tvTargetInfo.text = when (habit.completionMode) {
-                            CompletionMode.MEASURABLE -> "Цель: ${habit.targetValue.toLong()}"
-                            CompletionMode.CHECKABLE -> "Отмечаемая привычка"
+                            CompletionMode.MEASURABLE -> getString(
+                                R.string.habit_detail_mode_measurable_format,
+                                habit.targetValue.toLong(),
+                                habit.unit
+                            )
+
+                            CompletionMode.CHECKABLE -> getString(R.string.habit_detail_mode_checkable)
                         }
 
                         /** Заголовок недели */
@@ -151,7 +157,12 @@ class HabitDetailFragment : Fragment() {
                             it.status != DayCompletionStatus.NOT_CREATED
                         }
 
-                        binding.tvWeekSummary.text = "$doneCount из $totalDays дней"
+                        binding.tvWeekSummary.text = resources.getQuantityString(
+                            R.plurals.habit_detail_week_summary_format,
+                            totalDays,
+                            doneCount,
+                            totalDays
+                        )
                     }
                 }.collect { }
             }
@@ -160,8 +171,8 @@ class HabitDetailFragment : Fragment() {
 
     private fun showHabitMenu() {
         val popup = PopupMenu(requireContext(), binding.btnMenu)
-        popup.menu.add(0, 1, 0, "Переименовать")
-        popup.menu.add(0, 2, 1, "Удалить")
+        popup.menu.add(0, 1, 0, getString(R.string.habit_detail_menu_rename))
+        popup.menu.add(0, 2, 1, getString(R.string.habit_detail_menu_delete))
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -171,7 +182,7 @@ class HabitDetailFragment : Fragment() {
                 }
 
                 2 -> {
-                    // Пока не реализуем
+                    //todo  В будущие релизы
                     Toast.makeText(requireContext(), "Скоро будет", Toast.LENGTH_SHORT).show()
                     true
                 }
@@ -183,6 +194,7 @@ class HabitDetailFragment : Fragment() {
         popup.show()
     }
 
+    //todo переделать диалог
     private fun showRenameDialog() {
         val currentName = binding.tvHabitName.text.toString()
 

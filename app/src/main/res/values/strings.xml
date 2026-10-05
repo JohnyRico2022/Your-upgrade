@@ -1,5 +1,58 @@
 <resources>
     <string name="app_name">Your Upgrade</string>
 
+    <!-- Экран настроек: общее -->
+    <string name="settings_title">Настройки</string>
+
+    <!-- Экран Настроек: Уведомления -->
+    <string name="settings_notifications_title">Уведомления</string>
+    <string name="settings_notification_motivation_title">Мотивационное</string>
+    <string name="settings_notification_motivation_subtitle">Каждый день в 15:00</string>
+    <string name="settings_notification_evening_title">Вечернее</string>
+    <string name="settings_notification_evening_subtitle">Каждый день в 22:30</string>
+    <string name="settings_notification_weekly_title">Итоги недели</string>
+    <string name="settings_notification_weekly_subtitle">Понедельник в 8:30</string>
+
+    <!-- Экран Настроек: Звуки и вибрация -->
+    <string name="settings_sound_section_title">Звуки и вибрация</string>
+    <string name="settings_sound_effects_title">Звуковые эффекты</string>
+    <string name="settings_sound_effects_subtitle">Звук при отметке привычки</string>
+    <string name="settings_vibration_title">Вибрация</string>
+    <string name="settings_vibration_subtitle">Вибрация при отметке привычки</string>
+
+    <!-- Экран Настроек: Категории -->
+    <string name="settings_categories_title">Категории</string>
+    <string name="settings_add_category">+ Добавить категорию</string>
+
+    <!-- Экран Настроек: О приложении -->
+    <string name="settings_about_title">О приложении</string>
+    <string name="settings_version_format">Версия %1$s</string>
+    <string name="settings_made_with">made on Kotlin with ❤️</string>
+
+
+    <!-- Экран Подробности привычки: Привычка -->
+    <string name="habit_detail_type_daily">Ежедневно</string>
+    <string name="habit_detail_type_weekly">Еженедельно</string>
+    <string name="habit_detail_mode_checkable">Отмечаемая привычка</string>
+    <string name="habit_detail_mode_measurable_format">Цель: %1$d %2$s</string>
+
+    <!-- Экран Подробности привычки: Статистика недели -->
+    <string name="habit_detail_week_summary_header">Выполнено</string>
+    <plurals name="habit_detail_week_summary_format">
+        <item quantity="one">%1$d из %2$d дня</item>
+        <item quantity="few">%1$d из %2$d дней</item>
+        <item quantity="many">%1$d из %2$d дней</item>
+        <item quantity="other">%1$d из %2$d дней</item>
+    </plurals>
+
+    <!-- Экран Подробности привычки: Меню привычки (три точки) -->
+    <string name="habit_detail_menu_rename">Переименовать</string>
+    <string name="habit_detail_menu_delete">Удалить</string>
+    <string name="habit_detail_menu_archive">В архив</string>
+
+    <!-- Экран Подробности привычки: Подсказки -->
+    <!-- <string name="habit_detail_swipe_hint">← Свайп для переключения недель →</string>
+     <string name="habit_detail_current_week">Текущая неделя</string>
+     <string name="habit_detail_week_number_format">Неделя %1$d</string>-->
 
 </resources>
