@@ -2,29 +2,37 @@
     <!-- Base application theme. -->
     <style name="Base.Theme.YourUpgrade" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Основные цвета -->
-        <item name="colorPrimary">#2E5A3C</item>
+        <item name="colorPrimary">@color/main_gold</item>
         <item name="colorPrimaryVariant">#1B3A26</item>
         <item name="colorOnPrimary">#FFFFFF</item>
-
         <item name="colorSecondary">#C9A84C</item>
         <item name="colorSecondaryVariant">#A68A3E</item>
         <item name="colorOnSecondary">#2D2D2D</item>
-
         <!-- Фон -->
         <item name="android:windowBackground">@drawable/bg_app_gradient</item>
-
         <!-- Карточки -->
         <item name="cardBackgroundColor">#FFFFFF</item>
+        <!-- Фон для выпадающих меню-->
+        <item name="android:colorBackground">@android:color/white</item>
+        <item name="android:popupBackground">@android:color/white</item>
+        <item name="popupMenuBackground">@android:color/white</item>
+        <item name="android:popupMenuStyle">@style/AppPopupMenu</item>
+        <item name="spinnerDropDownItemStyle">@style/AppSpinnerDropDownItem</item>
     </style>
 
     <style name="Theme.YourUpgrade" parent="Base.Theme.YourUpgrade" />
 
-    <!-- Тема SplashScreen -->
-    <!-- <style name="Theme.App.Splash" parent="Theme.SplashScreen">
-         <item name="windowSplashScreenBackground">@color/main_gold</item>
-         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-         <item name="postSplashScreenTheme">@style/Base.Theme.YourUpgrade</item>
-     </style>-->
+    <!-- Стиль для PopupMenu -->
+    <style name="AppPopupMenu" parent="Widget.MaterialComponents.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+    </style>
+
+    <!-- Стиль для выпадающих элементов Spinner -->
+    <style name="AppSpinnerDropDownItem" parent="Widget.AppCompat.DropDownItem.Spinner">
+        <item name="android:background">@android:color/white</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
 
     <style name="Theme.App.Splash" parent="Theme.SplashScreen">
         <item name="android:windowSplashScreenBackground">@color/main_gold</item>

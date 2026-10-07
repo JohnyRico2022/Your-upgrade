@@ -60,8 +60,22 @@ class UserFragment : Fragment() {
                     binding.tvProgressLabel.text = state.progressLabel
 
                     // Статистика сегодня
-                    binding.tvTodayStats.text =
-                        "Выполнено ${state.todayDoneCount} из ${state.todayTotalCount} привычек"
+                    binding.tvTodayStats.text = getString(
+                        R.string.user_today_daily_format,
+                        state.todayDoneCount,
+                        state.todayTotalCount
+                    )
+
+                    binding.tvWeekStats.visibility = View.VISIBLE
+                    binding.tvWeekStats.text = getString(
+                        R.string.user_today_weekly_format,
+                        state.weekDoneCount,
+                        state.weekTotalCount
+                    )
+
+                    // Скрываем блок еженедельных, если их нет
+                    binding.tvWeekStats.visibility =
+                        if (state.weekTotalCount > 0) View.VISIBLE else View.GONE
 
                     // Категории
                     categoryAdapter.submitList(state.categories)

@@ -39,14 +39,14 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setupToggle()
+      //  setupToggle()
         setupDayLabels()
         setupBarChart()
         setupSwipeGestures()
         observeState()
     }
 
-    private fun setupToggle() {
+   /* private fun setupToggle() {
         binding.buttonWeek.isChecked = true
 
         binding.togglePeriod.addOnButtonCheckedListener { _, checkedId, isChecked ->
@@ -55,7 +55,7 @@ class HistoryFragment : Fragment() {
                 binding.buttonWeek.isChecked = true
             }
         }
-    }
+    }*/
 
     private fun setupDayLabels() {
         val dayNames = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")

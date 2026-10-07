@@ -1,5 +1,6 @@
 package ru.nikita.yourupgrade.ui.settings
 
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -47,7 +48,7 @@ class SettingsFragment : Fragment() {
 
         setupNotifications()
         setupSoundAndVibration()
-      //  setupTheme()
+        //  setupTheme()
         setupAbout()
         setupCategories()  // 🆕
 
@@ -130,7 +131,6 @@ class SettingsFragment : Fragment() {
              }
          }
      }*/
-
 
 
     /** Добавление категорий */
@@ -242,7 +242,18 @@ class SettingsFragment : Fragment() {
             .getPackageInfo(requireContext().packageName, 0)
 
         val versionName = packageInfo.versionName ?: "1.0.0"
-        binding.tvVersion.text = getString(R.string.settings_version_format, versionName)
+        val versionCode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            packageInfo.longVersionCode
+        } else {
+            @Suppress("DEPRECATION")
+            packageInfo.versionCode.toLong()
+        }
+
+        binding.tvVersion.text = getString(
+            R.string.settings_version_format,
+            versionName,
+            versionCode
+        )
     }
 
     override fun onDestroyView() {

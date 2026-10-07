@@ -7,13 +7,13 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.databinding.ItemCategoryBinding
 import java.util.Locale
 
 class CategoryAdapter :
     ListAdapter<CategoryProgress, CategoryAdapter.CategoryViewHolder>(DiffCallback()) {
 
-    // 🆕 Храним состояние раскрытия по ID категории
     private val expandedCategories = mutableSetOf<Long>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CategoryViewHolder {
@@ -34,22 +34,21 @@ class CategoryAdapter :
         fun bind(item: CategoryProgress) {
             binding.tvEmoji.text = item.emoji
             binding.tvCategoryName.text = item.name
-            binding.tvCategoryPoints.text = String.format(
-                Locale.getDefault(),
-                "%.2f баллов",
+            binding.tvCategoryPoints.text = binding.root.context.getString(
+                R.string.user_category_points_format,
                 item.points
             )
-            binding.tvCategoryLevel.text = "Ур. ${item.level}"
+            binding.tvCategoryLevel.text = binding.root.context.getString(
+                R.string.user_category_level_format,
+                item.level
+            )
 
-            // 🆕 Состояние раскрытия
             val isExpanded = expandedCategories.contains(item.id)
             binding.habitsContainer.visibility = if (isExpanded) View.VISIBLE else View.GONE
             binding.tvExpandArrow.text = if (isExpanded) "▲" else "▼"
 
-            // 🆕 Заполняем список привычек
             fillHabitsContainer(item, isExpanded)
 
-            // 🆕 Обработчик клика для раскрытия
             binding.categoryHeader.setOnClickListener {
                 if (expandedCategories.contains(item.id)) {
                     expandedCategories.remove(item.id)
@@ -60,7 +59,6 @@ class CategoryAdapter :
             }
         }
 
-        // 🆕 Заполняем контейнер привычками
         private fun fillHabitsContainer(
             item: CategoryProgress,
             isExpanded: Boolean
@@ -75,7 +73,6 @@ class CategoryAdapter :
             }
         }
 
-        // 🆕 Создаём View для одной привычки
         private fun createHabitView(habit: HabitPointsUi): View {
             val context = binding.root.context
 
@@ -86,7 +83,7 @@ class CategoryAdapter :
                     ViewGroup.LayoutParams.WRAP_CONTENT
                 )
                 setPadding(
-                    dpToPx(56),  // Отступ слева (под эмодзи)
+                    dpToPx(56),
                     dpToPx(4),
                     dpToPx(16),
                     dpToPx(4)

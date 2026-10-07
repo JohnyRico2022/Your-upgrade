@@ -11,7 +11,9 @@ data class UserUiState(
     val motivationQuote: String = "",
     val categories: List<CategoryProgress> = emptyList(),
     val todayDoneCount: Int = 0,
-    val todayTotalCount: Int = 0
+    val todayTotalCount: Int = 0,
+    val weekDoneCount: Int = 0,
+    val weekTotalCount: Int = 0
 )
 
 data class CategoryProgress(

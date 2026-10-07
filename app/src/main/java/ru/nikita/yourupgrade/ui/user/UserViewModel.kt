@@ -5,13 +5,16 @@ import androidx.compose.remote.creation.toFloat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
+import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.data.calculator.PointsCalculator
 import ru.nikita.yourupgrade.data.local.AppDatabase
 import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
+import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.data.repository.HabitRepository
 import ru.nikita.yourupgrade.util.PreferencesManager
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -25,6 +28,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     init {
         val db = AppDatabase.getDatabase(application)
+
         repository = HabitRepository(
             db.habitDao(),
             db.categoryDao(),
@@ -86,11 +90,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         } else 1f
 
 
-        // 3. Прогресс по категориям
+        /** Прогресс по категориям */
         val categoryProgress = categories.map { cat ->
-            val points = pointsByCategory[cat.id] ?: 0f
 
-            // 🆕 Собираем привычки этой категории с их баллами
+            val points = pointsByCategory[cat.id] ?: 0f
             val habitsOfCategory = habits.filter { it.categoryId == cat.id }
             val habitPointsList = habitsOfCategory.map { habit ->
                 val habitLogs = logs.filter { it.habitId == habit.id }
@@ -101,7 +104,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                     habitName = habit.name,
                     points = habitTotalPoints
                 )
-            }.sortedByDescending { it.points }  // Сортируем по убыванию баллов
+            }.sortedByDescending { it.points }
 
             CategoryProgress(
                 id = cat.id,
@@ -109,17 +112,56 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 emoji = cat.iconEmoji,
                 points = points,
                 level = PointsCalculator.getLevel(points),
-                habits = habitPointsList  // 🆕
+                habits = habitPointsList
+            )
+        }.toMutableList()
+
+        // 🆕 Привычки с удалёнными категориями → карточка "Без категории"
+        val existingCategoryIds = categories.map { it.id }.toSet()
+        val habitsWithoutCategory = habits.filter { it.categoryId !in existingCategoryIds }
+
+        if (habitsWithoutCategory.isNotEmpty()) {
+            val habitPointsList = habitsWithoutCategory.map { habit ->
+                val habitLogs = logs.filter { it.habitId == habit.id }
+                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }.toFloat()
+
+                HabitPointsUi(
+                    habitId = habit.id,
+                    habitName = habit.name,
+                    points = habitTotalPoints
+                )
+            }.sortedByDescending { it.points }
+
+            val noCategoryPoints = habitsWithoutCategory.sumOf { habit ->
+                logs.filter { it.habitId == habit.id }
+                    .sumOf { it.earnedPoints.toDouble() }
+            }.toFloat()
+
+            categoryProgress.add(
+                CategoryProgress(
+                    id = -1L,
+                    name = getApplication<Application>().getString(R.string.user_no_category),
+                    emoji = "📌",
+                    points = noCategoryPoints,
+                    level = PointsCalculator.getLevel(noCategoryPoints),
+                    habits = habitPointsList
+                )
             )
         }
 
-        // 4. Статистика за сегодня
+        /** Статистика за сегодня */
         val today = LocalDate.now().format(dateFormatter)
         val todayLogs = logs.filter { it.date == today }
-        val todayDoneCount = todayLogs.size
-        val todayTotalCount = habits.count {
-            it.type == ru.nikita.yourupgrade.data.model.HabitType.DAILY
+
+        val todayDailyLogs = todayLogs.count { log ->
+            habitsById[log.habitId]?.type == HabitType.DAILY
         }
+        val todayWeeklyLogs = todayLogs.count { log ->
+            habitsById[log.habitId]?.type == HabitType.WEEKLY
+        }
+
+        val dailyTotal = habits.count { it.type == HabitType.DAILY }
+        val weeklyTotal = habits.count { it.type == HabitType.WEEKLY }
 
         return UserUiState(
             userName = prefs.userName,
@@ -131,8 +173,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             progressLabel = progressLabel,
             motivationQuote = PointsCalculator.getMotivationQuote(level),
             categories = categoryProgress,
-            todayDoneCount = todayDoneCount,
-            todayTotalCount = todayTotalCount
+            todayDoneCount = todayDailyLogs,
+            todayTotalCount = dailyTotal,
+            weekDoneCount = todayWeeklyLogs,
+            weekTotalCount = weeklyTotal
         )
     }
 }

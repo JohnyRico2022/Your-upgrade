@@ -26,7 +26,7 @@
 
     <!-- Экран Настроек: О приложении -->
     <string name="settings_about_title">О приложении</string>
-    <string name="settings_version_format">Версия %1$s</string>
+    <string name="settings_version_format">Версия %1$s (%2$d)</string>
     <string name="settings_made_with">made on Kotlin with ❤️</string>
 
 
@@ -46,7 +46,7 @@
     </plurals>
 
     <!-- Экран Подробности привычки: Меню привычки (три точки) -->
-    <string name="habit_detail_menu_rename">Переименовать</string>
+    <string name="habit_detail_menu_rename">Изменить</string>
     <string name="habit_detail_menu_delete">Удалить</string>
     <string name="habit_detail_menu_archive">В архив</string>
 
@@ -54,5 +54,20 @@
     <!-- <string name="habit_detail_swipe_hint">← Свайп для переключения недель →</string>
      <string name="habit_detail_current_week">Текущая неделя</string>
      <string name="habit_detail_week_number_format">Неделя %1$d</string>-->
+
+    <!-- Экран Пользователь: Общее-->
+    <string name="user_level_title">Общий уровень</string>
+    <string name="user_skills_title">Навыки</string>
+    <string name="user_stats_today_title">Сегодня выполнено:</string>
+
+    <!-- Экран Пользователь: карточка категории -->
+    <string name="user_category_level_format">Ур. %1$d</string>
+    <string name="user_category_points_format">%1$.2f баллов</string>
+    <string name="user_no_category">Без категории</string>
+
+    <!-- Экран Пользователь: статистика -->
+    <string name="user_today_daily_format">%1$d из %2$d ежедневных привычек</string>
+    <string name="user_today_weekly_format">%1$d из %2$d еженедельных привычек</string>
+
 
 </resources>

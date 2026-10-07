@@ -8,6 +8,7 @@ import kotlinx.coroutines.launch
 import ru.nikita.yourupgrade.data.local.AppDatabase
 import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
+import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.LogStatus
 import ru.nikita.yourupgrade.data.repository.HabitRepository
@@ -149,6 +150,16 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
             val habit = habit.value ?: return@launch
             val updated = habit.copy(name = newName)
             repository.updateHabit(updated)
+        }
+    }
+
+    suspend fun getCategories(): List<SkillCategoryEntity> {
+        return repository.getAllCategoriesSync()
+    }
+
+    fun updateHabit(updatedHabit: HabitEntity) {
+        viewModelScope.launch {
+            repository.updateHabit(updatedHabit)
         }
     }
 }

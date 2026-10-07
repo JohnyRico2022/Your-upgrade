@@ -1,15 +1,12 @@
 package ru.nikita.yourupgrade.ui.habits_detail
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.PopupMenu
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -19,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import ru.nikita.yourupgrade.R
+import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.databinding.FragmentHabitDetailBinding
@@ -172,20 +170,21 @@ class HabitDetailFragment : Fragment() {
     private fun showHabitMenu() {
         val popup = PopupMenu(requireContext(), binding.btnMenu)
         popup.menu.add(0, 1, 0, getString(R.string.habit_detail_menu_rename))
-        popup.menu.add(0, 2, 1, getString(R.string.habit_detail_menu_delete))
+      //  popup.menu.add(0, 2, 1, getString(R.string.habit_detail_menu_delete))
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 1 -> {
-                    showRenameDialog()
+                    val habit = viewModel.habit.value
+                    if (habit != null) showRenameDialog(habit)
                     true
                 }
 
-                2 -> {
+              /*  2 -> {
                     //todo  В будущие релизы
                     Toast.makeText(requireContext(), "Скоро будет", Toast.LENGTH_SHORT).show()
                     true
-                }
+                }*/
 
                 else -> false
             }
@@ -194,27 +193,26 @@ class HabitDetailFragment : Fragment() {
         popup.show()
     }
 
-    //todo переделать диалог
-    private fun showRenameDialog() {
-        val currentName = binding.tvHabitName.text.toString()
+    private fun showRenameDialog(habit: HabitEntity) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val categories = viewModel.getCategories()
 
-        val editText = EditText(requireContext()).apply {
-            setText(currentName)
-            hint = "Новое название"
-            setPadding(48, 32, 48, 16)
-        }
+            val dialog = RenameHabitDialogFragment().apply {
+                this.habitName = habit.name
+                this.currentCategoryId = habit.categoryId
+                this.categories = categories
 
-        AlertDialog.Builder(requireContext())
-            .setTitle("Переименовать привычку")
-            .setView(editText)
-            .setPositiveButton("Сохранить") { _, _ ->
-                val newName = editText.text.toString().trim()
-                if (newName.isNotEmpty()) {
-                    viewModel.renameHabit(newName)
+                onHabitUpdated = { newName, newCategoryId ->
+                    viewModel.updateHabit(
+                        habit.copy(
+                            name = newName,
+                            categoryId = newCategoryId
+                        )
+                    )
                 }
             }
-            .setNegativeButton("Отмена", null)
-            .show()
+            dialog.show(childFragmentManager, "rename_habit")
+        }
     }
 
     override fun onDestroyView() {
