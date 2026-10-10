@@ -23,9 +23,7 @@ class HistoryFragment : Fragment() {
 
     private var _binding: FragmentHistoryBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: WeekStatsViewModel by viewModels()
-    private lateinit var gestureDetector: GestureDetector
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,23 +37,22 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-      //  setupToggle()
         setupDayLabels()
         setupBarChart()
-        setupSwipeGestures()
+        setupNavigationButtons()
         observeState()
     }
 
-   /* private fun setupToggle() {
-        binding.buttonWeek.isChecked = true
+    /* private fun setupToggle() {
+         binding.buttonWeek.isChecked = true
 
-        binding.togglePeriod.addOnButtonCheckedListener { _, checkedId, isChecked ->
-            if (isChecked && checkedId == binding.buttonMonth.id) {
-                Toast.makeText(requireContext(), "Месяц: скоро будет", Toast.LENGTH_SHORT).show()
-                binding.buttonWeek.isChecked = true
-            }
-        }
-    }*/
+         binding.togglePeriod.addOnButtonCheckedListener { _, checkedId, isChecked ->
+             if (isChecked && checkedId == binding.buttonMonth.id) {
+                 Toast.makeText(requireContext(), "Месяц: скоро будет", Toast.LENGTH_SHORT).show()
+                 binding.buttonWeek.isChecked = true
+             }
+         }
+     }*/
 
     private fun setupDayLabels() {
         val dayNames = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
@@ -83,45 +80,12 @@ class HistoryFragment : Fragment() {
         }
     }
 
-    // 🆕 Настройка свайпов
-    private fun setupSwipeGestures() {
-        gestureDetector =
-            GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
-
-                private val SWIPE_THRESHOLD = 100
-                private val SWIPE_VELOCITY_THRESHOLD = 100
-
-                override fun onFling(
-                    e1: MotionEvent?,
-                    e2: MotionEvent,
-                    velocityX: Float,
-                    velocityY: Float
-                ): Boolean {
-                    if (e1 == null) return false
-
-                    val diffX = e2.x - e1.x
-                    val diffY = e2.y - e1.y
-
-                    if (Math.abs(diffX) > Math.abs(diffY)) {
-                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffX > 0) {
-                                // Свайп вправо → предыдущая неделя
-                                viewModel.previousWeek()
-                            } else {
-                                // Свайп влево → следующая неделя
-                                viewModel.nextWeek()
-                            }
-                            return true
-                        }
-                    }
-                    return false
-                }
-            })
-
-        // Применяем GestureDetector к карточке заголовка недели
-        binding.cardWeekHeader.setOnTouchListener { v, event ->
-            gestureDetector.onTouchEvent(event)
-            true
+    private fun setupNavigationButtons() {
+        binding.arrowLeft.setOnClickListener {
+            viewModel.previousWeek()
+        }
+        binding.arrowRight.setOnClickListener {
+            viewModel.nextWeek()
         }
     }
 
@@ -177,7 +141,12 @@ class HistoryFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.tvWeekTitle.text = "Неделя ${state.weekNumber}"
+
+                    binding.tvWeekTitle.text = if (state.isCurrentWeek)
+                        "Текущая неделя"
+                    else
+                        "Неделя ${state.weekNumber}"
+
                     binding.tvWeekRange.text = state.dateRangeLabel
 
                     val hasAnyData = state.days.any { day ->
@@ -203,14 +172,6 @@ class HistoryFragment : Fragment() {
 
                     val points = state.days.map { it.points }
                     binding.barChart.setData(points, state.selectedDayIndex)
-
-                    /* val totalText = if (state.totalPoints >= 0) {
-                         "+${String.format(Locale.getDefault(), "%.2f", state.totalPoints)}"
-                     } else {
-                         String.format(Locale.getDefault(), "%.2f", state.totalPoints)
-                     }*/
-
-
                     binding.tvDailyPoints.text = formatPoints(state.dailyHabitsPoints)
                     binding.tvWeeklyPoints.text = formatPoints(state.weeklyHabitsPoints)
                     binding.tvAchievementPoints.text = "+${state.achievementPoints}"
@@ -222,6 +183,10 @@ class HistoryFragment : Fragment() {
                         0xFFE53935.toInt()
                     }
                     binding.tvWeekTotal.setTextColor(totalColor)
+
+                    // Блокируем кнопку вперёд на текущей неделе
+                    binding.arrowRight.isEnabled = !state.isCurrentWeek
+                    binding.arrowRight.alpha = if (state.isCurrentWeek) 0.3f else 1.0f
 
                     // Детали выбранного дня
                     val selectedDay = state.selectedDay

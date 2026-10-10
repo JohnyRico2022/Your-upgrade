@@ -6,7 +6,7 @@
 
     <!-- Экран Настроек: Уведомления -->
     <string name="settings_notifications_title">Уведомления</string>
-    <string name="settings_notification_motivation_title">Мотивационное</string>
+    <string name="settings_notification_motivation_title">Дневное</string>
     <string name="settings_notification_motivation_subtitle">Каждый день в 15:00</string>
     <string name="settings_notification_evening_title">Вечернее</string>
     <string name="settings_notification_evening_subtitle">Каждый день в 22:30</string>

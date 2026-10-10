@@ -52,7 +52,7 @@ class HabitDetailFragment : Fragment() {
         viewModel.setHabitId(habitId)
 
         setupWeekRecyclerView()
-        setupSwipeGestures()
+        setupNavigationButtons()
         observeData()
     }
 
@@ -66,53 +66,19 @@ class HabitDetailFragment : Fragment() {
         binding.rvWeekDays.adapter = dayAdapter
     }
 
-    private fun setupSwipeGestures() {
-        gestureDetector =
-            GestureDetector(requireContext(), object : GestureDetector.SimpleOnGestureListener() {
-
-                private val SWIPE_THRESHOLD = 100
-                private val SWIPE_VELOCITY_THRESHOLD = 100
-
-                override fun onFling(
-                    e1: MotionEvent?,
-                    e2: MotionEvent,
-                    velocityX: Float,
-                    velocityY: Float
-                ): Boolean {
-                    if (e1 == null) return false
-
-                    val diffX = e2.x - e1.x
-                    val diffY = e2.y - e1.y
-
-                    if (Math.abs(diffX) > Math.abs(diffY)) {
-                        if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                            if (diffX > 0) {
-                                // Свайп вправо → предыдущая неделя
-                                viewModel.previousWeek()
-                            } else {
-                                // Свайп влево → следующая неделя (если можно)
-                                if (viewModel.canGoNext()) {
-                                    viewModel.nextWeek()
-                                }
-                            }
-                            return true
-                        }
-                    }
-                    return false
-                }
-            })
-
-        binding.cardWeek.setOnTouchListener { v, event ->
-            gestureDetector.onTouchEvent(event)
-            true
+    private fun setupNavigationButtons() {
+        binding.arrowLeft.setOnClickListener {
+            viewModel.previousWeek()
+        }
+        binding.arrowRight.setOnClickListener {
+            viewModel.nextWeek()
         }
     }
-
 
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(viewModel.habit, viewModel.weekLogs) { habit, logs ->
+                combine(viewModel.habit, viewModel.weekLogs, viewModel.weekOffset) { habit, logs, offset ->
                     if (habit != null) {
                         /** Заголовок */
                         binding.tvHabitName.text = habit.name
@@ -120,6 +86,9 @@ class HabitDetailFragment : Fragment() {
                         binding.btnMenu.setOnClickListener {
                             showHabitMenu()
                         }
+
+                        /** Диапазон дат */
+                        binding.tvWeekRange.text = viewModel.getWeekRangeLabel()
 
                         /** Категория */
                         val typeLabel = when (habit.type) {
@@ -141,6 +110,12 @@ class HabitDetailFragment : Fragment() {
 
                         /** Заголовок недели */
                         binding.tvWeekTitle.text = viewModel.getWeekTitle()
+
+
+                        /** Блокировка кнопки вперёд на текущей неделе */
+                        val isCurrentWeek = offset == 0
+                        binding.arrowRight.isEnabled = !isCurrentWeek
+                        binding.arrowRight.alpha = if (isCurrentWeek) 0.3f else 1.0f
 
                         /** Дни недели */
                         val weekStatuses = viewModel.buildWeekStatuses(habit, logs)

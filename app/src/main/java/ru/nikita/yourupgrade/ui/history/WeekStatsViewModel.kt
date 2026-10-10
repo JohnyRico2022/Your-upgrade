@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import ru.nikita.yourupgrade.data.model.HabitType
+import java.time.temporal.IsoFields
 
 class WeekStatsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -26,7 +27,7 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
 
     // 🆕 По умолчанию показываем ПРЕДЫДУЩУЮ неделю
     private val _weekStart = MutableStateFlow(
-        LocalDate.now().with(DayOfWeek.MONDAY).minusWeeks(1)
+        LocalDate.now().with(DayOfWeek.MONDAY)
     )
 
     private val _uiState = MutableStateFlow(WeekStatsUiState())
@@ -42,21 +43,27 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
         loadWeekStats()
     }
 
+    private fun isCurrentWeek(weekStart: LocalDate): Boolean {
+        val currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY)
+        return weekStart.isEqual(currentWeekStart)
+    }
+
+
     // 🆕 Переход на следующую неделю (но не дальше предыдущей от текущей)
     fun nextWeek() {
-        val lastAllowedWeek = LocalDate.now().with(DayOfWeek.MONDAY).minusWeeks(1)
+        val currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY)
         val nextWeek = _weekStart.value.plusWeeks(1)
 
-        if (!nextWeek.isAfter(lastAllowedWeek)) {
+        // Нельзя уйти дальше текущей недели
+        if (!nextWeek.isAfter(currentWeekStart)) {
             _weekStart.value = nextWeek
             loadWeekStats()
         }
     }
 
-    // 🆕 Можно ли перейти на следующую неделю
     fun canGoNext(): Boolean {
-        val lastAllowedWeek = LocalDate.now().with(DayOfWeek.MONDAY).minusWeeks(1)
-        return _weekStart.value.isBefore(lastAllowedWeek)
+        val currentWeekStart = LocalDate.now().with(DayOfWeek.MONDAY)
+        return _weekStart.value.isBefore(currentWeekStart)
     }
 
     // 🆕 Выбор дня
@@ -171,11 +178,15 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
 
         val achievementPoints = db.achievementDao().getPointsForDateRange(weekStartStr, weekEndStr)
 
+        // В месте сборки UiState:
+        val isCurrent = isCurrentWeek(weekStart)
+
         return WeekStatsUiState(
             weekNumber = weekNumber,
             weekStart = weekStart,
             weekEnd = weekEnd,
             days = days,
+            isCurrentWeek = isCurrent,
             totalPoints = totalPoints,
             selectedDayIndex = -1,
             dailyHabitsPoints = dailyPoints,

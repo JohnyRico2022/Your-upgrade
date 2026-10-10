@@ -28,6 +28,7 @@ data class WeekStatsUiState(
     val weekStart: LocalDate = LocalDate.now(),
     val weekEnd: LocalDate = LocalDate.now(),
     val days: List<DayStats> = emptyList(),
+    val isCurrentWeek: Boolean = true,
     val totalPoints: Float = 0f,
     val selectedDayIndex: Int = -1,
     val dailyHabitsPoints: Float = 0f,

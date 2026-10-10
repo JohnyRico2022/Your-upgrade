@@ -25,9 +25,8 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
 
     private val repository: HabitRepository
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
+    private val displayDateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
     private val _habitId = MutableStateFlow<Long>(-1L)
-
     private val _weekOffset = MutableStateFlow(0)
     private val db = AppDatabase.getDatabase(application)
 
@@ -36,8 +35,6 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
         else db.habitDao().getHabitByIdFlow(id)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-
-    // 🆕 Логи зависят от привычки И от смещения недели
     val weekLogs: StateFlow<List<HabitLogEntry>> = combine(_habitId, _weekOffset) { id, offset ->
         id to offset
     }.flatMapLatest { (id, offset) ->
@@ -54,7 +51,6 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // 🆕 Текущее смещение для UI
     val weekOffset: StateFlow<Int> = _weekOffset.asStateFlow()
 
     init {
@@ -70,22 +66,16 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
         _habitId.value = id
     }
 
-    // 🆕 Переход на предыдущую неделю (свайп вправо)
     fun previousWeek() {
         _weekOffset.value -= 1
     }
 
-    // 🆕 Переход на следующую неделю (свайп влево), но не дальше текущей
     fun nextWeek() {
         if (_weekOffset.value < 0) {
             _weekOffset.value += 1
         }
     }
 
-    // 🆕 Можно ли идти вперёд
-    fun canGoNext(): Boolean = _weekOffset.value < 0
-
-    // 🆕 Заголовок недели: "Текущая неделя" или "Неделя 37"
     fun getWeekTitle(): String {
         return if (_weekOffset.value == 0) {
             "Текущая неделя"
@@ -97,8 +87,15 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun getWeekRangeLabel(): String {
+        val monday = LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(_weekOffset.value.toLong())
+        val sunday = monday.plusDays(6)
+        return "${monday.format(displayDateFormatter)} - ${sunday.format(displayDateFormatter)}"
+    }
+
     fun buildWeekStatuses(habit: HabitEntity, logs: List<HabitLogEntry>): List<DayStatusUiItem> {
-        val monday = LocalDate.now().with(DayOfWeek.MONDAY)
+        // ← КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: используем offset, а не now()
+        val monday = LocalDate.now().with(DayOfWeek.MONDAY).plusWeeks(_weekOffset.value.toLong())
         val today = LocalDate.now()
         val dayNames = listOf("ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС")
 
@@ -124,9 +121,9 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
                     } else 0f
 
                     when {
-                        percent >= 1.0f -> DayCompletionStatus.DONE     // 100%+ зелёный
-                        percent >= 0.5f -> DayCompletionStatus.PARTIAL  // 50-99% жёлтый
-                        else -> DayCompletionStatus.MISSED              // <50% красный
+                        percent >= 1.0f -> DayCompletionStatus.DONE
+                        percent >= 0.5f -> DayCompletionStatus.PARTIAL
+                        else -> DayCompletionStatus.MISSED
                     }
                 }
 

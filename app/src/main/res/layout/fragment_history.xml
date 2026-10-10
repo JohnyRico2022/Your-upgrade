@@ -65,43 +65,64 @@
                 app:cardBackgroundColor="@android:color/white"
                 app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
                 app:strokeWidth="1dp">
 
-                <LinearLayout
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/constraint_week"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <ImageView
+                        android:id="@+id/arrow_left"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_arrow_left_24"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:padding="4dp"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
+                    <ImageView
+                        android:id="@+id/arrow_right"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/ic_arrow_right_24"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        android:padding="4dp"
+                        app:layout_constraintBottom_toBottomOf="parent"/>
+
                     <TextView
                         android:id="@+id/tvWeekTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Неделя 37"
+                        android:layout_marginTop="8dp"
+                        tools:text="Неделя 37"
                         android:textColor="@color/black"
                         android:textSize="20sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
 
                     <TextView
                         android:id="@+id/tvWeekRange"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="07.09.2026 - 13.09.2026"
+                        android:layout_marginTop="8dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tvWeekTitle"
+                        tools:text="07.09.2026 - 13.09.2026"
+                        app:layout_constraintBottom_toBottomOf="@+id/constraint_week"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:alpha="0.6"
-                        android:text="← Свайп для переключения →"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp" />
-
-                </LinearLayout>
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.card.MaterialCardView>
 
