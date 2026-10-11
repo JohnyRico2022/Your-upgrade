@@ -22,9 +22,7 @@ class RewardsFragment : Fragment() {
 
     private var _binding: FragmentRewardsBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: RewardsViewModel by viewModels()
-    private lateinit var achievementAdapter: AchievementAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,15 +36,7 @@ class RewardsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-      //  setupRecyclerView()
         observeState()
-    }
-
-    private fun setupRecyclerView() {
-       /* achievementAdapter = AchievementAdapter()
-        binding.rvAchievements.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvAchievements.adapter = achievementAdapter
-        binding.rvAchievements.isNestedScrollingEnabled = false*/
     }
 
     private fun observeState() {
@@ -54,27 +44,21 @@ class RewardsFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     if (state.hasEnoughHabits) {
-                        // 🆕 Показываем контент с ачивками
                         binding.cardNotEnoughHabits.visibility = View.GONE
                         binding.rewardsContent.visibility = View.VISIBLE
-
                         binding.tvTotalAchievementPoints.text = state.totalAchievementPoints.toString()
-                        // 🆕 Заполняем контейнер категориями
                         fillAchievements(state.categories)
                     } else {
-                        // 🆕 Показываем баннер
                         binding.cardNotEnoughHabits.visibility = View.VISIBLE
                         binding.rewardsContent.visibility = View.GONE
-
-                        binding.tvHabitsCount.text =
-                            "Сейчас у вас ${state.habitsCount} привычки из 4 необходимых"
+                        //todo вынести в класс
+                        binding.bannerEmoji.text = "🔒"
                     }
                 }
             }
         }
     }
 
-    // 🆕 Заполняем контейнер категориями
     private fun fillAchievements(categories: List<AchievementCategoryUi>) {
         binding.achievementsContainer.removeAllViews()
 
@@ -84,7 +68,6 @@ class RewardsFragment : Fragment() {
         }
     }
 
-    // 🆕 Создаём карточку категории
     private fun createCategoryCard(category: AchievementCategoryUi): View {
         val context = requireContext()
 
@@ -93,7 +76,7 @@ class RewardsFragment : Fragment() {
             radius = dpToPx(16).toFloat()
             cardElevation = 0f
             strokeWidth = dpToPx(1)
-            setStrokeColor(0xFFE0E0E0.toInt())
+            strokeColor = 0xFFE0E0E0.toInt()
             setCardBackgroundColor(0xFFFFFFFF.toInt())
             setContentPadding(dpToPx(16), dpToPx(16), dpToPx(16), dpToPx(16))
             layoutParams = LinearLayout.LayoutParams(
@@ -183,7 +166,6 @@ class RewardsFragment : Fragment() {
         return cardView
     }
 
-    // 🆕 Создаём View для одного уровня
     private fun createLevelView(level: AchievementLevelUi): View {
         val context = requireContext()
 
@@ -200,13 +182,18 @@ class RewardsFragment : Fragment() {
             gravity = Gravity.CENTER
             setPadding(dpToPx(8), dpToPx(12), dpToPx(8), dpToPx(12))
 
-            // Фон в зависимости от статуса
             background = GradientDrawable().apply {
                 cornerRadius = dpToPx(12).toFloat()
-                setColor(
-                    if (level.isEarned) 0xFFFFF8E1.toInt()
-                    else 0xFFF5F5F5.toInt()
-                )
+
+                if (level.isEarned) {
+                    // ✅ Выполнено: светло-зелёный фон + зелёная рамка
+                    setColor(0xFFE8F5E9.toInt())  // Светло-зелёный фон
+                    setStroke(dpToPx(2), 0xFF4CAF50.toInt())  // Зелёная рамка 2dp
+                } else {
+                    // ⏳ Не выполнено: серый фон без рамки
+                    setColor(0xFFF5F5F5.toInt())  // Светло-серый фон
+                    setStroke(0, 0)  // Без рамки
+                }
             }
         }
 
@@ -224,7 +211,7 @@ class RewardsFragment : Fragment() {
             textSize = 12f
             gravity = Gravity.CENTER
             setTextColor(
-                if (level.isEarned) 0xFFD5A72D.toInt()
+                if (level.isEarned) 0xFF4CAF50.toInt()  // 🆕 Зелёный для выполненных
                 else 0xFF9E9E9E.toInt()
             )
             setTypeface(null, Typeface.BOLD)
@@ -270,7 +257,6 @@ class RewardsFragment : Fragment() {
     private fun dpToPx(dp: Int): Int {
         return (dp * resources.displayMetrics.density).toInt()
     }
-
 
     override fun onResume() {
         super.onResume()

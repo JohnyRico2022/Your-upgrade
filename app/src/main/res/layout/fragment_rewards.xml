@@ -12,16 +12,14 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Заголовок -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Награды"
+            android:text="@string/rewards_title"
             android:textColor="@color/text_primary"
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <!-- 🆕 Баннер: недостаточно привычек -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardNotEnoughHabits"
             android:layout_width="match_parent"
@@ -42,9 +40,10 @@
                 android:padding="24dp">
 
                 <TextView
+                    android:id="@+id/banner_emoji"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="🔒"
+                    tools:text="🔒"
                     android:textSize="48sp" />
 
                 <TextView
@@ -52,7 +51,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:gravity="center"
-                    android:text="Добавьте привычки, чтобы получать награды"
+                    android:text="@string/rewards_banner_title"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -63,7 +62,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:gravity="center"
-                    android:text="Сейчас у вас 2 привычки из 4 необходимых"
+                    android:text="@string/rewards_banner_subtitle"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
@@ -71,14 +70,12 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 🆕 Контент с ачивками (виден когда привычек >= 4) -->
         <LinearLayout
             android:id="@+id/rewardsContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Карточка с очками за ачивки -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -100,7 +97,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Очки за достижения"
+                        android:text="@string/rewards_achievement_points_title"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -109,7 +106,7 @@
                         android:id="@+id/tvTotalAchievementPoints"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="0"
+                        tools:text="0"
                         android:textColor="@color/main_gold"
                         android:textSize="22sp"
                         android:textStyle="bold" />
@@ -118,7 +115,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Список категорий ачивок -->
             <LinearLayout
                 android:id="@+id/achievementsContainer"
                 android:layout_width="match_parent"

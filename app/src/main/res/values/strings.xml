@@ -70,4 +70,13 @@
     <string name="user_today_weekly_format">%1$d из %2$d еженедельных привычек</string>
 
 
+    <!-- Экран Награды -->
+    <string name="rewards_title">Награды</string>
+    <string name="rewards_banner_title">Добавьте привычки, чтобы получать награды</string>
+    <string name="rewards_banner_subtitle">Необходимо более 4-х привычек</string>
+    <string name="rewards_achievement_points_title">Очки за достижения</string>
+
+    android:text="🔒"
+
+
 </resources>

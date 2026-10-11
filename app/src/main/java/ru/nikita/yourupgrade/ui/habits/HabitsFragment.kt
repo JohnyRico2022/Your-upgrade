@@ -24,6 +24,8 @@ import ru.nikita.yourupgrade.databinding.FragmentHabitsBinding
 import java.util.concurrent.TimeUnit
 import androidx.navigation.fragment.findNavController
 import ru.nikita.yourupgrade.R
+import ru.nikita.yourupgrade.data.local.entity.AchievementEntity
+import ru.nikita.yourupgrade.ui.rewards.AchievementDialogFragment
 import ru.nikita.yourupgrade.util.FeedbackManager
 
 class HabitsFragment : Fragment() {
@@ -50,6 +52,11 @@ class HabitsFragment : Fragment() {
         setupToggleGroup()
         setupFab()
         observeData()
+
+        // 🆕 Подписываемся на ачивки
+        viewModel.onAchievementsEarned = { achievements ->
+            showAchievementDialog(achievements)
+        }
     }
 
     private fun setupAdapters() {
@@ -122,6 +129,15 @@ class HabitsFragment : Fragment() {
         binding.konfettiView.start(party)
     }
 
+    // 🆕 Метод показа диалога
+    private fun showAchievementDialog(achievements: List<AchievementEntity>) {
+       // FeedbackManager.onAchievementEarned()  // звук + вибрация
+
+        val dialog = AchievementDialogFragment().apply {
+            this.achievements = achievements
+        }
+        dialog.show(childFragmentManager, "achievement")
+    }
 
     private fun showInputValueDialog(habit: HabitUiItem) {
 

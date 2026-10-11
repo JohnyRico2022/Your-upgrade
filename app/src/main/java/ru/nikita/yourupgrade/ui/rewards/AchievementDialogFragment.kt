@@ -33,6 +33,7 @@ class AchievementDialogFragment : DialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         dialog?.window?.setBackgroundDrawableResource(android.R.color.transparent)
+        dialog?.window?.setDimAmount(0.6f)
 
         val achievement = achievements.firstOrNull()
         if (achievement != null) {
@@ -114,6 +115,7 @@ class AchievementDialogFragment : DialogFragment() {
         }
     }
 
+    // 🆕 Фиксируем размер по ширине
     override fun onStart() {
         super.onStart()
         dialog?.window?.setLayout(

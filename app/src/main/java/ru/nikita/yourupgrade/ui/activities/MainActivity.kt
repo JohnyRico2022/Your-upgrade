@@ -41,9 +41,29 @@ class MainActivity : AppCompatActivity() {
 
         requestNotificationPermission()
         setupNavigation()
+       // showTestAchievement()  // для тестов
         setupAchievements()
         PenaltyChecker.checkAndApplyPenalties(this)
     }
+
+    /// Тестовый показ — всегда показывается при старте
+    /*   private fun showTestAchievement() {
+           // Задержка чтобы MainActivity успел отрисоваться
+           binding.root.postDelayed({
+               val testAchievement = AchievementEntity(
+                   id = 0,
+                   type = AchievementType.APP_USAGE,
+                   level = 1,
+                   earnedDate = "2026-09-27",
+                   points = 2
+               )
+
+               val dialog = AchievementDialogFragment().apply {
+                   this.achievements = listOf(testAchievement)
+               }
+               dialog.show(supportFragmentManager, "test_achievement")
+           }, 500)  // 500мс задержка
+       }*/
 
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -112,7 +132,8 @@ class MainActivity : AppCompatActivity() {
     private fun setupAchievements() {
         backfillAppUsage()
 
-        AchievementChecker.checkAndGrantAchievements(this) { newAchievements ->
+        // 🆕 При старте проверяем ТОЛЬКО заход в приложение
+        AchievementChecker.checkAppUsage(this) { newAchievements ->
             if (newAchievements.isNotEmpty()) {
                 showAchievementDialog(newAchievements)
             }
@@ -148,5 +169,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 }

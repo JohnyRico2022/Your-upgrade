@@ -4,6 +4,8 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import ru.nikita.yourupgrade.data.local.AppDatabase
 import ru.nikita.yourupgrade.data.local.entity.AchievementEntity
@@ -21,63 +23,89 @@ import java.time.format.DateTimeFormatter
 object AchievementChecker {
 
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
-    // Пороги ачивок
+    private val mutex = Mutex()  // Mutex для синхронизации — только одна проверка одновременно
     private val FULL_DAYS_THRESHOLDS = listOf(3, 10, 30)
     private val FULL_DAYS_STREAK_THRESHOLDS = listOf(3, 7, 15)
     private val HABIT_STREAK_THRESHOLDS = listOf(5, 15, 21)
     private val APP_USAGE_THRESHOLDS = listOf(7, 21, 60)
-
-    // Очки за уровень
     private val LEVEL_POINTS = listOf(2, 3, 4)
-
-    // 🆕 Минимальное количество привычек для ачивок
     private const val MIN_HABITS_FOR_ACHIEVEMENTS = 4
 
-    fun checkAndGrantAchievements(
-        context: Context,
-        onNewAchievements: (List<AchievementEntity>) -> Unit
-    ) {
+    fun checkAppUsage(context: Context, onNewAchievements: (List<AchievementEntity>) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val db = AppDatabase.getDatabase(context)
-            val today = LocalDate.now()
-            val todayStr = today.format(dateFormatter)
+            mutex.withLock {
+                val db = AppDatabase.getDatabase(context)
+                val todayStr = LocalDate.now().format(dateFormatter)
 
-            // 1. Записываем заход в приложение
-            val existingUsage = db.appUsageDao().getUsageByDate(todayStr)
-            if (existingUsage == null) {
-                db.appUsageDao().insertUsage(AppUsageEntity(date = todayStr))
-            }
-
-            // 2. Получаем данные
-            val allHabits = db.habitDao().getAllHabitsSync()
-            val dailyHabits = allHabits.filter { it.type == HabitType.DAILY && it.isActive }
-
-            // 🆕 Проверка: минимум 4 привычки
-            if (dailyHabits.size < MIN_HABITS_FOR_ACHIEVEMENTS) {
-                withContext(Dispatchers.Main) {
-                    onNewAchievements(emptyList())
+                // Записываем заход
+                val existingUsage = db.appUsageDao().getUsageByDate(todayStr)
+                if (existingUsage == null) {
+                    db.appUsageDao().insertUsage(AppUsageEntity(date = todayStr))
                 }
-                return@launch
+
+                val existingAchievements = db.achievementDao().getAllAchievementsSync()
+                val newAchievements = mutableListOf<AchievementEntity>()
+
+                checkAppUsageAchievements(db, existingAchievements, todayStr, newAchievements)
+
+                newAchievements.forEach { db.achievementDao().insertAchievement(it) }
+
+                withContext(Dispatchers.Main) {
+                    onNewAchievements(newAchievements)
+                }
             }
+        }
+    }
 
-            val allLogs = db.habitLogDao().getAllLogsSync()
-            val existingAchievements = db.achievementDao().getAllAchievementsSync()
+    fun checkHabitRelated(context: Context, onNewAchievements: (List<AchievementEntity>) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            mutex.withLock {
+                val db = AppDatabase.getDatabase(context)
+                val today = LocalDate.now()
 
-            val newAchievements = mutableListOf<AchievementEntity>()
+                val allHabits = db.habitDao().getAllHabitsSync()
+                val dailyHabits = allHabits.filter { it.type == HabitType.DAILY && it.isActive }
 
-            // 3. Проверяем все типы ачивок
-            checkFullDaysAchievements(dailyHabits, allLogs, existingAchievements, today, newAchievements)
-            checkFullDaysStreakAchievements(dailyHabits, allLogs, existingAchievements, today, newAchievements)
-            checkHabitStreakAchievements(dailyHabits, allLogs, existingAchievements, today, newAchievements)
-            checkAppUsageAchievements(db, existingAchievements, todayStr, newAchievements)
+                // Минимум 4 привычки
+                if (dailyHabits.size < MIN_HABITS_FOR_ACHIEVEMENTS) {
+                    withContext(Dispatchers.Main) {
+                        onNewAchievements(emptyList())
+                    }
+                    return@launch
+                }
 
-            // 4. Сохраняем новые ачивки
-            newAchievements.forEach { db.achievementDao().insertAchievement(it) }
+                val allLogs = db.habitLogDao().getAllLogsSync()
+                val existingAchievements = db.achievementDao().getAllAchievementsSync()
 
-            // 5. Возвращаем результат
-            withContext(Dispatchers.Main) {
-                onNewAchievements(newAchievements)
+                val newAchievements = mutableListOf<AchievementEntity>()
+
+                checkFullDaysAchievements(
+                    dailyHabits,
+                    allLogs,
+                    existingAchievements,
+                    today,
+                    newAchievements
+                )
+                checkFullDaysStreakAchievements(
+                    dailyHabits,
+                    allLogs,
+                    existingAchievements,
+                    today,
+                    newAchievements
+                )
+                checkHabitStreakAchievements(
+                    dailyHabits,
+                    allLogs,
+                    existingAchievements,
+                    today,
+                    newAchievements
+                )
+
+                newAchievements.forEach { db.achievementDao().insertAchievement(it) }
+
+                withContext(Dispatchers.Main) {
+                    onNewAchievements(newAchievements)
+                }
             }
         }
     }
@@ -107,7 +135,13 @@ object AchievementChecker {
 
         FULL_DAYS_THRESHOLDS.forEachIndexed { index, threshold ->
             val level = index + 1
-            if (fullDaysCount >= threshold && !isEarnedGlobal(existingAchievements, newAchievements, AchievementType.FULL_DAYS, level)) {
+            if (fullDaysCount >= threshold && !isEarnedGlobal(
+                    existingAchievements,
+                    newAchievements,
+                    AchievementType.FULL_DAYS,
+                    level
+                )
+            ) {
                 newAchievements.add(
                     AchievementEntity(
                         type = AchievementType.FULL_DAYS,
@@ -147,7 +181,13 @@ object AchievementChecker {
 
         FULL_DAYS_STREAK_THRESHOLDS.forEachIndexed { index, threshold ->
             val level = index + 1
-            if (streak >= threshold && !isEarnedGlobal(existingAchievements, newAchievements, AchievementType.FULL_DAYS_STREAK, level)) {
+            if (streak >= threshold && !isEarnedGlobal(
+                    existingAchievements,
+                    newAchievements,
+                    AchievementType.FULL_DAYS_STREAK,
+                    level
+                )
+            ) {
                 newAchievements.add(
                     AchievementEntity(
                         type = AchievementType.FULL_DAYS_STREAK,
@@ -185,7 +225,13 @@ object AchievementChecker {
         // 🆕 Начисляем ачивки глобально (без привязки к привычке)
         HABIT_STREAK_THRESHOLDS.forEachIndexed { index, threshold ->
             val level = index + 1
-            if (maxStreak >= threshold && !isEarnedGlobal(existingAchievements, newAchievements, AchievementType.HABIT_STREAK, level)) {
+            if (maxStreak >= threshold && !isEarnedGlobal(
+                    existingAchievements,
+                    newAchievements,
+                    AchievementType.HABIT_STREAK,
+                    level
+                )
+            ) {
                 newAchievements.add(
                     AchievementEntity(
                         type = AchievementType.HABIT_STREAK,
@@ -225,6 +271,7 @@ object AchievementChecker {
                     } else 0f
                     percent >= 0.5f
                 }
+
                 else -> true
             }
 
@@ -261,7 +308,13 @@ object AchievementChecker {
 
         APP_USAGE_THRESHOLDS.forEachIndexed { index, threshold ->
             val level = index + 1
-            if (totalUsageDays >= threshold && !isEarnedGlobal(existingAchievements, newAchievements, AchievementType.APP_USAGE, level)) {
+            if (totalUsageDays >= threshold && !isEarnedGlobal(
+                    existingAchievements,
+                    newAchievements,
+                    AchievementType.APP_USAGE,
+                    level
+                )
+            ) {
                 newAchievements.add(
                     AchievementEntity(
                         type = AchievementType.APP_USAGE,
@@ -276,16 +329,16 @@ object AchievementChecker {
 
     // === Вспомогательные функции ===
 
-   /* private fun isEarned(
-        existing: List<AchievementEntity>,
-        new: List<AchievementEntity>,
-        type: AchievementType,
-        level: Int,
-        habitId: Long?
-    ): Boolean {
-        return existing.any { it.type == type && it.level == level && it.habitId == habitId } ||
-                new.any { it.type == type && it.level == level && it.habitId == habitId }
-    }*/
+    /* private fun isEarned(
+         existing: List<AchievementEntity>,
+         new: List<AchievementEntity>,
+         type: AchievementType,
+         level: Int,
+         habitId: Long?
+     ): Boolean {
+         return existing.any { it.type == type && it.level == level && it.habitId == habitId } ||
+                 new.any { it.type == type && it.level == level && it.habitId == habitId }
+     }*/
 
     private fun isFullDay(
         dailyHabits: List<HabitEntity>,
@@ -315,6 +368,7 @@ object AchievementChecker {
                     } else 0f
                     percent >= 0.5f
                 }
+
                 else -> true
             }
 

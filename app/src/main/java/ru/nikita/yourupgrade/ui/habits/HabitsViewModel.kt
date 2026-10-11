@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import ru.nikita.yourupgrade.data.calculator.AchievementChecker
 import ru.nikita.yourupgrade.data.calculator.PointsCalculator
 import ru.nikita.yourupgrade.data.local.AppDatabase
+import ru.nikita.yourupgrade.data.local.entity.AchievementEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.repository.HabitRepository
@@ -28,6 +30,9 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
 
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
+
+    // 🆕 Callback для показа диалога ачивок из фрагмента
+    var onAchievementsEarned: ((List<AchievementEntity>) -> Unit)? = null
 
     val dailyHabits: Flow<List<HabitEntity>>
     val weeklyHabits: Flow<List<HabitEntity>>
@@ -60,7 +65,6 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
             if (existingLog != null) {
                 repository.unmarkHabit(habitId, dateStr)
             } else {
-                // 🆕 Получаем привычку чтобы узнать её тип
                 val habit = repository.getHabitById(habitId) ?: return@launch
                 val points = PointsCalculator.calculatePoints(
                     habit.completionMode,
@@ -69,6 +73,8 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                     habitType = habit.type
                 )
                 repository.markHabitDone(habitId, dateStr, points)
+
+                checkHabitAchievements()
             }
         }
     }
@@ -107,6 +113,20 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                     status = LogStatus.DONE
                 )
                 repository.insertLog(log)
+            }
+
+            // 🆕 После отметки проверяем ачивки
+            checkHabitAchievements()
+        }
+    }
+
+
+
+    // 🆕 Вызов проверки ачивок после отметки
+    private fun checkHabitAchievements() {
+        AchievementChecker.checkHabitRelated(getApplication()) { newAchievements ->
+            if (newAchievements.isNotEmpty()) {
+                onAchievementsEarned?.invoke(newAchievements)
             }
         }
     }

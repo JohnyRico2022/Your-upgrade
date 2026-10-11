@@ -1,9 +1,11 @@
 package ru.nikita.yourupgrade.data.local.dao
 
-import androidx.room.*
-import kotlinx.coroutines.flow.Flow
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
 import ru.nikita.yourupgrade.data.local.entity.AchievementEntity
-import ru.nikita.yourupgrade.data.model.AchievementType
 
 @Dao
 interface AchievementDao {
