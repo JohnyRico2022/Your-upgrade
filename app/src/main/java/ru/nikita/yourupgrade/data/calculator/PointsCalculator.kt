@@ -1,6 +1,5 @@
 package ru.nikita.yourupgrade.data.calculator
 
-import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.HabitType
 import kotlin.math.roundToInt
@@ -9,20 +8,6 @@ object PointsCalculator {
 
     private val LEVEL_THRESHOLDS = listOf(0f, 30f, 100f, 250f, 500f, 1000f)
 
-    /**
-     * Рассчитывает баллы за выполнение привычки
-     */
-
-    /* fun calculatePointsFromLog(log: HabitLogEntry, completionMode: CompletionMode): Float {
-         return calculatePoints(
-             completedValue = log.completedValue,
-             targetValue = log.targetValue,
-             completionMode = completionMode
-         )
-     }*/
-
-
-    // Старая версия для новых записей
     fun calculatePoints(
         completionMode: CompletionMode,
         completedValue: Float,
@@ -49,8 +34,8 @@ object PointsCalculator {
                 val percent = if (targetValue > 0) completedValue / targetValue else 0f
                 when {
                     percent >= 1.0f -> 1.0f
-                    percent >= 0.5f -> 0.5f
-                    else -> -0.25f       // Штраф за пропуск
+                    percent >= 0.5f -> (percent * 100).roundToInt() / 100f  // пропорционально 0.5-1
+                    else -> -0.25f
                 }
             }
         }
@@ -68,17 +53,15 @@ object PointsCalculator {
             }
 
             CompletionMode.MEASURABLE -> {
-                // Измеряемая: пропорционально
                 val percent = if (targetValue > 0) completedValue / targetValue else 0f
                 when {
-                    percent >= 1.0f -> 2.0f      // 100% → 2 балла
-                    percent >= 0.5f -> 1.0f      // 50-99% → 1 балл
-                    else -> -0.25f              // Штраф за пропуск
+                    percent >= 1.0f -> 2.0f
+                    percent >= 0.5f -> (percent * 200).roundToInt() / 100f  // пропорционально 1-2
+                    else -> -0.5f
                 }
             }
         }
     }
-
 
     /** Определяет текущий уровень по сумме баллов */
     fun getLevel(totalPoints: Float): Int {
@@ -98,16 +81,12 @@ object PointsCalculator {
         return LEVEL_THRESHOLDS.getOrElse(level - 1) { 0f }
     }
 
-    /**
-     * Верхняя граница текущего уровня (для прогресс-бара)
-     */
+    /** Верхняя граница текущего уровня (для прогресс-бара) */
     fun getLevelMaxPoints(level: Int): Float {
         return LEVEL_THRESHOLDS.getOrElse(level) { 1000f }
     }
 
-    /**
-     * Мотивационная фраза в зависимости от уровня
-     */
+    /** Мотивационная фраза в зависимости от уровня */
     fun getMotivationQuote(level: Int): String {
         return when (level) {
             1 -> "Каждый шаг вперёд — это победа!"
@@ -117,10 +96,5 @@ object PointsCalculator {
             5 -> "Ты на вершине, но нет предела совершенства!"
             else -> "Начните свой путь"
         }
-    }
-
-    //todo в Utils
-    private fun roundTo2Decimals(value: Float): Float {
-        return ((value * 100f).roundToInt() / 100f)
     }
 }

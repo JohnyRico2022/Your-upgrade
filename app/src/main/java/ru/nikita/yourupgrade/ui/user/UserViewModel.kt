@@ -23,7 +23,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: HabitRepository
     private val prefs = PreferencesManager(application)
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
     val uiState: StateFlow<UserUiState>
 
     init {
@@ -35,7 +34,6 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             db.habitLogDao(),
             db.achievementDao()
         )
-
 
         uiState = combine(
             repository.getAllCategories(),

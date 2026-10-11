@@ -45,13 +45,14 @@ class HabitRepository(
     suspend fun getLogForHabitAndDate(habitId: Long, date: String): HabitLogEntry? =
         habitLogDao.getLogForHabitAndDate(habitId, date)
 
-    suspend fun markHabitDone(habitId: Long, date: String, points: Float = 1f) {
+    suspend fun markHabitDone(habitId: Long, date: String, points: Float, targetValue: Float) {
         habitLogDao.insertLog(
             HabitLogEntry(
                 habitId = habitId,
                 date = date,
                 completedValue = 1f,
                 earnedPoints = points,
+                targetValue = targetValue,
                 status = LogStatus.DONE
             )
         )
@@ -67,8 +68,8 @@ class HabitRepository(
         habitLogDao.deleteLogByHabitAndDate(habitId, date)
     }
 
-    suspend fun updateLog(habitId: Long, date: String, value: Float, points: Float) {
-        habitLogDao.updateLog(habitId, date, value, points)
+    suspend fun updateLog(habitId: Long, date: String, value: Float, points: Float, targetValue: Float) {
+        habitLogDao.updateLog(habitId, date, value, points, targetValue)
     }
 
     suspend fun updateHabit(habit: HabitEntity) {

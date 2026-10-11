@@ -18,7 +18,6 @@ class UserFragment : Fragment() {
 
     private var _binding: FragmentUserBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: UserViewModel by viewModels()
     private lateinit var categoryAdapter: CategoryAdapter
 

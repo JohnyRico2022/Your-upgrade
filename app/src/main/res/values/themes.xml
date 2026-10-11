@@ -18,6 +18,9 @@
         <item name="popupMenuBackground">@android:color/white</item>
         <item name="android:popupMenuStyle">@style/AppPopupMenu</item>
         <item name="spinnerDropDownItemStyle">@style/AppSpinnerDropDownItem</item>
+
+        <item name="android:statusBarColor">#FFFFFF</item> <!-- ✅ Белый фон статус-бара -->
+        <item name="android:windowLightStatusBar">true</item> <!-- ✅ Тёмные иконки (часы, батарея) -->
     </style>
 
     <style name="Theme.YourUpgrade" parent="Base.Theme.YourUpgrade" />
@@ -34,6 +37,7 @@
         <item name="android:paddingVertical">12dp</item>
     </style>
 
+    <!-- Стиль для SplashScreen -->
     <style name="Theme.App.Splash" parent="Theme.SplashScreen">
         <item name="android:windowSplashScreenBackground">@color/main_gold</item>
         <item name="android:windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
@@ -41,14 +45,15 @@
         <item name="postSplashScreenTheme">@style/Theme.YourUpgrade</item>
     </style>
 
-    <style name="Widget.App.ToggleButtonGroup" parent="Widget.MaterialComponents.MaterialButtonToggleGroup">
-        <item name="materialButtonStyle">@style/Widget.App.ToggleButton</item>
-    </style>
-
+    <!-- Стиль для кнопки переключения -->
     <style name="Widget.App.ToggleButton" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="backgroundTint">@color/toggle_button_bg</item>
         <item name="android:textColor">@color/toggle_button_text</item>
         <item name="strokeColor">@color/main_gold</item>
+    </style>
+
+    <style name="Widget.App.ToggleButtonGroup" parent="Widget.MaterialComponents.MaterialButtonToggleGroup">
+        <item name="materialButtonStyle">@style/Widget.App.ToggleButton</item>
     </style>
 
 </resources>

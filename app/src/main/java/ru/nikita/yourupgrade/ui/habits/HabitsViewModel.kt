@@ -1,6 +1,7 @@
 package ru.nikita.yourupgrade.ui.habits
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.Flow
@@ -27,13 +28,9 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
 
     private val repository: HabitRepository
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
-
-    // 🆕 Callback для показа диалога ачивок из фрагмента
     var onAchievementsEarned: ((List<AchievementEntity>) -> Unit)? = null
-
     val dailyHabits: Flow<List<HabitEntity>>
     val weeklyHabits: Flow<List<HabitEntity>>
     val categories: Flow<List<SkillCategoryEntity>>
@@ -72,14 +69,16 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                     targetValue = habit.targetValue,
                     habitType = habit.type
                 )
-                repository.markHabitDone(habitId, dateStr, points)
+                val targetValue: Float = habit.targetValue
+
+                repository.markHabitDone(habitId, dateStr, points, targetValue)
 
                 checkHabitAchievements()
             }
         }
     }
 
-    // 🆕 Для MEASURABLE: сохранение значения
+    /** Для MEASURABLE: сохранение значения */
     fun saveMeasurableValue(habitId: Long, value: Float) {
         viewModelScope.launch {
             val dateStr = _selectedDate.value.format(dateFormatter)
@@ -96,13 +95,14 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                 targetValue = habit.targetValue,
                 habitType = habit.type
             )
+            val targetValue = habit.targetValue
 
-            // 🆕 Проверяем, есть ли уже запись за сегодня
+            // Проверяем, есть ли уже запись за сегодня
             val existingLog = repository.getLogForHabitAndDate(habitId, dateStr)
 
             if (existingLog != null) {
-                // 🆕 Обновляем существующую запись
-                repository.updateLog(habitId, dateStr, value, points)
+                // Обновляем существующую запись
+                repository.updateLog(habitId, dateStr, value, points, targetValue)
             } else {
                 // Создаём новую
                 val log = HabitLogEntry(
@@ -110,19 +110,17 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
                     date = dateStr,
                     completedValue = value,
                     earnedPoints = points,
-                    status = LogStatus.DONE
+                    status = LogStatus.DONE,
+                    targetValue = targetValue
                 )
                 repository.insertLog(log)
             }
 
-            // 🆕 После отметки проверяем ачивки
             checkHabitAchievements()
         }
     }
 
-
-
-    // 🆕 Вызов проверки ачивок после отметки
+    // Вызов проверки ачивок после отметки
     private fun checkHabitAchievements() {
         AchievementChecker.checkHabitRelated(getApplication()) { newAchievements ->
             if (newAchievements.isNotEmpty()) {
@@ -160,70 +158,5 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
 
     suspend fun getCategories(): List<SkillCategoryEntity> {
         return repository.getAllCategoriesSync()
-    }
-
-
-    fun markHabitDone(habitId: Long) {
-        viewModelScope.launch {
-
-            val habit = repository.getHabitById(habitId) ?: return@launch
-            val today = LocalDate.now().format(dateFormatter)
-
-            val existingLog = repository.getLogForHabitAndDate(habitId, today)
-            if (existingLog != null) return@launch
-
-            val points = PointsCalculator.calculatePoints(
-                completedValue = 1f,
-                targetValue = habit.targetValue,
-                completionMode = habit.completionMode,
-                habitType = habit.type
-            )
-
-            val log = HabitLogEntry(
-                habitId = habitId,
-                date = today,
-                completedValue = 1f,
-                targetValue = habit.targetValue,  // 🆕 Фиксируем цель
-                earnedPoints = points,
-                status = LogStatus.DONE
-            )
-            repository.insertLog(log)
-        }
-    }
-
-    fun setProgress(habitId: Long, value: Float) {
-        viewModelScope.launch {
-            val habit = repository.getHabitById(habitId) ?: return@launch
-            val today = LocalDate.now().format(dateFormatter)
-
-            val existingLog = repository.getLogForHabitAndDate(habitId, today)
-
-            val points = PointsCalculator.calculatePoints(
-                completedValue = value,
-                targetValue = habit.targetValue,
-                completionMode = habit.completionMode,
-                habitType = habit.type
-            )
-
-            if (existingLog != null) {
-                // Обновляем существующий лог, но НЕ меняем targetValue
-                /* val updated = existingLog.copy(
-                     completedValue = value,
-                     earnedPoints = points
-                     // targetValue остаётся прежним!
-                 )
-                 repository.updateLog(updated)*/
-            } else {
-                val log = HabitLogEntry(
-                    habitId = habitId,
-                    date = today,
-                    completedValue = value,
-                    targetValue = habit.targetValue,  // 🆕 Фиксируем цель при создании
-                    earnedPoints = points,
-                    status = if (points >= 0) LogStatus.DONE else LogStatus.MISSED
-                )
-                repository.insertLog(log)
-            }
-        }
     }
 }
