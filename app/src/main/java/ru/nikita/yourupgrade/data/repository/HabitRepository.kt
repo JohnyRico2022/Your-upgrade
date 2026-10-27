@@ -42,6 +42,17 @@ class HabitRepository(
     fun getLogsForDate(date: String): Flow<List<HabitLogEntry>> =
         habitLogDao.getLogsForDate(date)
 
+
+    // 🆕 Реактивная версия (для UI observe)
+    fun getLogsForDateRange(startDate: String, endDate: String): Flow<List<HabitLogEntry>> {
+        return habitLogDao.getLogsForDateRange(startDate, endDate)
+    }
+
+    // 🆕 Синхронная версия (для одноразовых запросов в корутинах)
+    suspend fun getLogsForDateRangeSync(startDate: String, endDate: String): List<HabitLogEntry> {
+        return habitLogDao.getLogsForDateRangeSync(startDate, endDate)
+    }
+
     suspend fun getLogForHabitAndDate(habitId: Long, date: String): HabitLogEntry? =
         habitLogDao.getLogForHabitAndDate(habitId, date)
 

@@ -111,10 +111,20 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
             val log = logMap[dateStr]
 
             val status = when {
+                // День ещё не наступил — будущее
+                date.isAfter(today) -> DayCompletionStatus.NOT_CREATED
+
+                // Привычка ещё не была создана на этот день
                 date.isBefore(createdDate) -> DayCompletionStatus.NOT_CREATED
+
+                // Прошлый день, нет записи — пропуск
                 log == null -> DayCompletionStatus.MISSED
+
+                // Штраф
                 log.status == LogStatus.MISSED -> DayCompletionStatus.MISSED
                 log.earnedPoints < 0 -> DayCompletionStatus.MISSED
+
+                // Есть запись — проверяем выполнение
                 habit.completionMode == CompletionMode.MEASURABLE -> {
                     val percent = if (habit.targetValue > 0) {
                         log.completedValue / habit.targetValue

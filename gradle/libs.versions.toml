@@ -1,6 +1,6 @@
 [versions]
 # Core
-agp = "8.7.3"
+agp = "8.13.1"
 coreSplashscreen = "1.2.0"
 kotlin = "2.1.0"
 ksp = "2.1.0-1.0.29"
@@ -13,7 +13,7 @@ constraintlayout = "2.2.0"
 cardview = "1.0.0"
 
 # UI
-material = "1.12.0"
+material = "1.14.0"
 navigation = "2.8.5"
 
 # Architecture
@@ -27,6 +27,7 @@ espressoCore = "3.6.1"
 
 konfetti = "2.0.4"
 remoteCreationCore = "1.0.0-alpha20"
+places = "4.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -55,6 +56,7 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 
 konfetti = { group = "nl.dionsegijn", name = "konfetti-xml", version.ref = "konfetti" }
 androidx-remote-creation-core = { group = "androidx.compose.remote", name = "remote-creation-core", version.ref = "remoteCreationCore" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

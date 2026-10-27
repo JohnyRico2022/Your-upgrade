@@ -14,6 +14,9 @@ interface HabitLogDao {
     @Query("SELECT * FROM habit_logs WHERE date = :date")
     fun getLogsForDate(date: String): Flow<List<HabitLogEntry>>
 
+    @Query("SELECT * FROM habit_logs WHERE date >= :start AND date <= :end")
+    fun getLogsForDateRange(start: String, end: String): Flow<List<HabitLogEntry>>
+
     @Query("SELECT * FROM habit_logs WHERE habitId = :habitId AND date = :date")
     suspend fun getLogForHabitAndDate(habitId: Long, date: String): HabitLogEntry?
 
@@ -39,5 +42,5 @@ interface HabitLogDao {
     suspend fun updateLog(habitId: Long, date: String, value: Float, points: Float, targetValue: Float)
 
     @Query("SELECT * FROM habit_logs WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
-    suspend fun getLogsForDateRange(startDate: String, endDate: String): List<HabitLogEntry>
+    suspend fun getLogsForDateRangeSync(startDate: String, endDate: String): List<HabitLogEntry>
 }

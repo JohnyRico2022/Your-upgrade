@@ -172,9 +172,13 @@ class HistoryFragment : Fragment() {
 
                     val points = state.days.map { it.points }
                     binding.barChart.setData(points, state.selectedDayIndex)
+
                     binding.tvDailyPoints.text = formatPoints(state.dailyHabitsPoints)
+
                     binding.tvWeeklyPoints.text = formatPoints(state.weeklyHabitsPoints)
+
                     binding.tvAchievementPoints.text = "+${state.achievementPoints}"
+
                     binding.tvWeekTotal.text = formatPoints(state.totalPoints)
 
                     val totalColor = if (state.totalPoints >= 0) {

@@ -17,7 +17,6 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.WeekFields
 import ru.nikita.yourupgrade.data.model.HabitType
-import java.time.temporal.IsoFields
 
 class WeekStatsViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -100,7 +99,7 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
         // Получаем все логи за неделю одним запросом
         val weekStartStr = weekStart.format(dateFormatter)
         val weekEndStr = weekEnd.format(dateFormatter)
-        val weekLogs = db.habitLogDao().getLogsForDateRange(weekStartStr, weekEndStr)
+        val weekLogs = db.habitLogDao().getLogsForDateRangeSync(weekStartStr, weekEndStr)
 
         val logsByDate = weekLogs.groupBy { it.date }
 
@@ -111,7 +110,7 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
             val dateStr = date.format(dateFormatter)
             val dayLogs = logsByDate[dateStr] ?: emptyList()
 
-            android.util.Log.d("MyLog", "--- День: $dateStr, логов: ${dayLogs.size} ---")
+            Log.d("MyLog", "--- День: $dateStr, логов: ${dayLogs.size} ---")
 
             // Считаем баллы за день (включая штрафы)
             val dayPoints = dayLogs.sumOf { it.earnedPoints.toDouble() }.toFloat()
@@ -161,8 +160,6 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
             )
         }
 
-        val totalPoints = days.sumOf { it.points.toDouble() }.toFloat()
-
         val dailyHabitsIds = allHabits.filter { it.type == HabitType.DAILY }.map { it.id }.toSet()
         val weeklyHabitsIds = allHabits.filter { it.type == HabitType.WEEKLY }.map { it.id }.toSet()
 
@@ -170,15 +167,15 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
         var weeklyPoints = 0f
 
         for (log in weekLogs) {
-            when {
-                log.habitId in dailyHabitsIds -> dailyPoints += log.earnedPoints
-                log.habitId in weeklyHabitsIds -> weeklyPoints += log.earnedPoints
+            when (log.habitId) {
+                in dailyHabitsIds -> dailyPoints += log.earnedPoints
+                in weeklyHabitsIds -> weeklyPoints += log.earnedPoints
             }
         }
 
         val achievementPoints = db.achievementDao().getPointsForDateRange(weekStartStr, weekEndStr)
+        val totalPoints = dailyPoints + weeklyPoints + achievementPoints
 
-        // В месте сборки UiState:
         val isCurrent = isCurrentWeek(weekStart)
 
         return WeekStatsUiState(

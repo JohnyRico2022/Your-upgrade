@@ -21,6 +21,7 @@ import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.model.CompletionMode
 import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.data.model.LogStatus
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -37,6 +38,16 @@ class HabitsViewModel(application: Application) : AndroidViewModel(application) 
 
     val logsForDate: Flow<List<HabitLogEntry>> = _selectedDate.flatMapLatest { date ->
         repository.getLogsForDate(date.format(dateFormatter))
+    }
+
+    // 🆕 Логи за текущую неделю — для еженедельных
+    val logsForWeek: Flow<List<HabitLogEntry>> = _selectedDate.flatMapLatest { date ->
+        val monday = date.with(DayOfWeek.MONDAY)
+        val sunday = monday.plusDays(6)
+        repository.getLogsForDateRange(
+            monday.format(dateFormatter),
+            sunday.format(dateFormatter)
+        )
     }
 
     init {

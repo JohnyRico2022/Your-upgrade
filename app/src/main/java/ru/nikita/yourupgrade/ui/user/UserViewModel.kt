@@ -91,11 +91,14 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         /** Прогресс по категориям */
         val categoryProgress = categories.map { cat ->
 
-            val points = pointsByCategory[cat.id] ?: 0f
+            val points = (pointsByCategory[cat.id] ?: 0f).coerceAtLeast(0f)
+
             val habitsOfCategory = habits.filter { it.categoryId == cat.id }
             val habitPointsList = habitsOfCategory.map { habit ->
                 val habitLogs = logs.filter { it.habitId == habit.id }
-                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }.toFloat()
+                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }
+                    .toFloat()
+                    .coerceAtLeast(0f)
 
                 HabitPointsUi(
                     habitId = habit.id,
@@ -121,7 +124,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
         if (habitsWithoutCategory.isNotEmpty()) {
             val habitPointsList = habitsWithoutCategory.map { habit ->
                 val habitLogs = logs.filter { it.habitId == habit.id }
-                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }.toFloat()
+                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }
+                    .toFloat()
+                    .coerceAtLeast(0f)
 
                 HabitPointsUi(
                     habitId = habit.id,
@@ -133,7 +138,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             val noCategoryPoints = habitsWithoutCategory.sumOf { habit ->
                 logs.filter { it.habitId == habit.id }
                     .sumOf { it.earnedPoints.toDouble() }
-            }.toFloat()
+            }.toFloat().coerceAtLeast(0f)
 
             categoryProgress.add(
                 CategoryProgress(

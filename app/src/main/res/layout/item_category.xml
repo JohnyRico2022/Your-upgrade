@@ -89,7 +89,7 @@
 
         </LinearLayout>
 
-        <!-- 🆕 Раскрывающийся список привычек -->
+        <!-- Раскрывающийся список привычек -->
         <LinearLayout
             android:id="@+id/habitsContainer"
             android:layout_width="match_parent"

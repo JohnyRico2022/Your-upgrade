@@ -27,6 +27,8 @@ import ru.nikita.yourupgrade.R
 import ru.nikita.yourupgrade.data.local.entity.AchievementEntity
 import ru.nikita.yourupgrade.ui.rewards.AchievementDialogFragment
 import ru.nikita.yourupgrade.util.FeedbackManager
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class HabitsFragment : Fragment() {
 
@@ -223,8 +225,8 @@ class HabitsFragment : Fragment() {
                     combine(
                         viewModel.weeklyHabits,
                         viewModel.categories,
-                        viewModel.logsForDate,
-                        ::toUiItemsWithStatus
+                        viewModel.logsForWeek,
+                        ::toWeeklyUiItems
                     ).collect { uiItems ->
                         weeklyAdapter.submitList(uiItems)
                         binding.tvEmptyWeekly.visibility =
@@ -263,6 +265,49 @@ class HabitsFragment : Fragment() {
                 targetValue = habit.targetValue,
                 isDoneToday = isDone,
                 completedValue = completedValue,
+                unit = habit.unit
+            )
+        }
+
+        return items.sortedWith(
+            compareBy<HabitUiItem> { it.isFullyDone }
+                .thenBy { it.name.lowercase() }
+        )
+    }
+
+    private fun toWeeklyUiItems(
+        habits: List<HabitEntity>,
+        categories: List<SkillCategoryEntity>,
+        weekLogs: List<HabitLogEntry>
+    ): List<HabitUiItem> {
+        val categoryMap = categories.associateBy { it.id }
+        val logsByHabit = weekLogs.groupBy { it.habitId }
+
+        val todayStr = LocalDate.now().format(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        )
+
+        val items = habits.map { habit ->
+            val category = categoryMap[habit.categoryId]
+            val habitLogs = logsByHabit[habit.id] ?: emptyList()
+
+            // 🆕 Сумма за всю неделю
+            val completedValue = habitLogs.sumOf { it.completedValue.toDouble() }.toFloat()
+
+            // 🆕 Отдельно: есть ли отметка именно сегодня
+            val todayLog = habitLogs.find { it.date == todayStr }
+            val isDoneToday = todayLog != null
+
+            HabitUiItem(
+                id = habit.id,
+                name = habit.name,
+                categoryName = category?.name ?: "Без категории",
+                categoryEmoji = category?.iconEmoji ?: "📌",
+                type = habit.type,
+                completionMode = habit.completionMode,
+                targetValue = habit.targetValue,
+                isDoneToday = isDoneToday,
+                completedValue = completedValue,  // 🆕 накопленное за неделю
                 unit = habit.unit
             )
         }
