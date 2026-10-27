@@ -126,7 +126,7 @@ object AchievementChecker {
         }
 
         var checkDate = minCreatedDate
-        while (!checkDate.isAfter(today.minusDays(1))) {
+        while (!checkDate.isAfter(today)) {
             if (isFullDay(dailyHabits, logsByDate, checkDate)) {
                 fullDaysCount++
             }
@@ -165,7 +165,7 @@ object AchievementChecker {
         val logsByDate = allLogs.groupBy { it.date }
 
         var streak = 0
-        var checkDate = today.minusDays(1)
+        var checkDate = today
         val minCreatedDate = dailyHabits.minOf { habit ->
             Instant.ofEpochMilli(habit.createdAt).atZone(ZoneId.systemDefault()).toLocalDate()
         }
@@ -253,9 +253,16 @@ object AchievementChecker {
     ): Int {
         val createdDate = Instant.ofEpochMilli(habit.createdAt)
             .atZone(ZoneId.systemDefault()).toLocalDate()
+       // 🆕 Проверяем, есть ли отметка за сегодня
+        val todayStr = today.format(dateFormatter)
+        val todayLog = logsByDate[todayStr]?.find { it.habitId == habit.id }
+        val todayDone = todayLog != null && todayLog.earnedPoints >= 0 &&
+                (habit.completionMode != CompletionMode.MEASURABLE ||
+                        todayLog.completedValue / habit.targetValue >= 0.5f)
+
 
         var streak = 0
-        var checkDate = today.minusDays(1)
+        var checkDate = if (todayDone) today else today.minusDays(1)
 
         while (!checkDate.isBefore(createdDate)) {
             val dateStr = checkDate.format(dateFormatter)
@@ -326,19 +333,6 @@ object AchievementChecker {
             }
         }
     }
-
-    // === Вспомогательные функции ===
-
-    /* private fun isEarned(
-         existing: List<AchievementEntity>,
-         new: List<AchievementEntity>,
-         type: AchievementType,
-         level: Int,
-         habitId: Long?
-     ): Boolean {
-         return existing.any { it.type == type && it.level == level && it.habitId == habitId } ||
-                 new.any { it.type == type && it.level == level && it.habitId == habitId }
-     }*/
 
     private fun isFullDay(
         dailyHabits: List<HabitEntity>,

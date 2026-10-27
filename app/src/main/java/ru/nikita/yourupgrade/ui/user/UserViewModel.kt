@@ -61,11 +61,54 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             pointsByCategory[cat.id] = 0f
         }
 
+        // 🆕 Разделяем логи по типу привычки
+        val dailyHabits = habits.filter { it.type == HabitType.DAILY }
+        val weeklyHabits = habits.filter { it.type == HabitType.WEEKLY }
+
+        val dailyHabitIds = dailyHabits.map { it.id }.toSet()
+        val weeklyHabitIds = weeklyHabits.map { it.id }.toSet()
+
+        // 1. Ежедневные: просто суммируем earnedPoints
         for (log in logs) {
+            if (log.habitId !in dailyHabitIds) continue
             val habit = habitsById[log.habitId] ?: continue
             val current = pointsByCategory[habit.categoryId] ?: 0f
             pointsByCategory[habit.categoryId] = current + log.earnedPoints
         }
+
+        // 2. 🆕 Еженедельные: группируем по неделям и пересчитываем
+        val weeklyLogsByHabit = logs.filter { it.habitId in weeklyHabitIds }
+            .groupBy { it.habitId }
+
+        for (habit in weeklyHabits) {
+            val habitLogs = weeklyLogsByHabit[habit.id] ?: emptyList()
+
+            // Группируем логи этой привычки по неделям
+            val logsByWeek = habitLogs.groupBy { log ->
+                LocalDate.parse(log.date, dateFormatter)
+                    .with(DayOfWeek.MONDAY)
+            }
+
+            // Считаем баллы за каждую неделю
+            var totalWeeklyPoints = 0f
+            for ((_, weekLogs) in logsByWeek) {
+                val weekTotal = weekLogs.sumOf { it.completedValue.toDouble() }.toFloat()
+
+                val weekPoints = PointsCalculator.calculatePoints(
+                    completionMode = habit.completionMode,
+                    completedValue = weekTotal,
+                    targetValue = habit.targetValue,
+                    habitType = HabitType.WEEKLY
+                )
+
+                totalWeeklyPoints += weekPoints
+            }
+
+            // Добавляем к категории
+            val current = pointsByCategory[habit.categoryId] ?: 0f
+            pointsByCategory[habit.categoryId] = current + totalWeeklyPoints
+        }
+
 
         // 🆕 Получаем очки за ачивки
         val achievementPoints = repository.getTotalAchievementPoints()?.toFloat() ?: 0f
@@ -96,9 +139,26 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
             val habitsOfCategory = habits.filter { it.categoryId == cat.id }
             val habitPointsList = habitsOfCategory.map { habit ->
                 val habitLogs = logs.filter { it.habitId == habit.id }
-                val habitTotalPoints = habitLogs.sumOf { it.earnedPoints.toDouble() }
-                    .toFloat()
-                    .coerceAtLeast(0f)
+
+                // 🆕 Для еженедельных пересчитываем по неделям
+                val habitTotalPoints = if (habit.type == HabitType.WEEKLY) {
+                    val logsByWeek = habitLogs.groupBy { log ->
+                        LocalDate.parse(log.date, dateFormatter)
+                            .with(DayOfWeek.MONDAY)
+                    }
+
+                    logsByWeek.values.sumOf { weekLogs ->
+                        val weekTotal = weekLogs.sumOf { it.completedValue.toDouble() }.toFloat()
+                        PointsCalculator.calculatePoints(
+                            completionMode = habit.completionMode,
+                            completedValue = weekTotal,
+                            targetValue = habit.targetValue,
+                            habitType = HabitType.WEEKLY
+                        ).toDouble()
+                    }.toFloat()
+                } else
+                    habitLogs.sumOf { it.earnedPoints.toDouble() }
+                        .toFloat()  // Для ежедневных просто сумма
 
                 HabitPointsUi(
                     habitId = habit.id,

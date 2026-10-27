@@ -10,6 +10,7 @@ import ru.nikita.yourupgrade.data.local.entity.HabitEntity
 import ru.nikita.yourupgrade.data.local.entity.HabitLogEntry
 import ru.nikita.yourupgrade.data.local.entity.SkillCategoryEntity
 import ru.nikita.yourupgrade.data.model.CompletionMode
+import ru.nikita.yourupgrade.data.model.HabitType
 import ru.nikita.yourupgrade.data.model.LogStatus
 import ru.nikita.yourupgrade.data.repository.HabitRepository
 import ru.nikita.yourupgrade.ui.habits.DayCompletionStatus
@@ -105,10 +106,18 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
 
         val logMap = logs.associateBy { it.date }
 
+        // 🆕 Для недельных: считаем накопленный прогресс
+        var accumulatedValue = 0f
+
         return (0..6).map { index ->
             val date = monday.plusDays(index.toLong())
             val dateStr = date.format(dateFormatter)
             val log = logMap[dateStr]
+
+            // 🆕 Накапливаем значение для недельных
+            if (habit.type == HabitType.WEEKLY && log != null && !date.isAfter(today)) {
+                accumulatedValue += log.completedValue
+            }
 
             val status = when {
                 // День ещё не наступил — будущее
@@ -118,16 +127,37 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
                 date.isBefore(createdDate) -> DayCompletionStatus.NOT_CREATED
 
                 // Прошлый день, нет записи — пропуск
-                log == null -> DayCompletionStatus.MISSED
+                log == null && habit.type == HabitType.DAILY -> DayCompletionStatus.MISSED
 
-                // Штраф
-                log.status == LogStatus.MISSED -> DayCompletionStatus.MISSED
-                log.earnedPoints < 0 -> DayCompletionStatus.MISSED
+                // Прошлый день, нет записи для недельных
+              /*  log == null && habit.type == HabitType.WEEKLY -> {
+                    if (accumulatedValue > 0) DayCompletionStatus.PARTIAL
+                    else DayCompletionStatus.NOT_CREATED
+                }*/
 
-                // Есть запись — проверяем выполнение
-                habit.completionMode == CompletionMode.MEASURABLE -> {
+                // 🆕 Измеряемая недельная: проверяем от accumulatedValue
+                habit.completionMode == CompletionMode.MEASURABLE && habit.type == HabitType.WEEKLY -> {
                     val percent = if (habit.targetValue > 0) {
-                        log.completedValue / habit.targetValue
+                        accumulatedValue / habit.targetValue  // ← от накопленного!
+                    } else 0f
+
+                    when {
+                        percent >= 1.0f -> DayCompletionStatus.DONE
+                        percent >= 0.5f -> DayCompletionStatus.PARTIAL
+                        else -> DayCompletionStatus.PARTIAL
+                    }
+                }
+
+                // 🆕 4. Недельная CHECKABLE: либо выполнено, либо нет
+                habit.type == HabitType.WEEKLY && habit.completionMode == CompletionMode.CHECKABLE -> {
+                    if (accumulatedValue >= 1f) DayCompletionStatus.DONE
+                    else DayCompletionStatus.PARTIAL  // ещё не выполнено
+                }
+
+                // Измеряемая дневная: проверяем от log.completedValue
+                habit.completionMode == CompletionMode.MEASURABLE && habit.type == HabitType.DAILY -> {
+                    val percent = if (habit.targetValue > 0) {
+                        (log?.completedValue ?: 0f) / habit.targetValue
                     } else 0f
 
                     when {
@@ -144,7 +174,8 @@ class HabitDetailViewModel(application: Application) : AndroidViewModel(applicat
                 dayShortName = dayNames[index],
                 date = dateStr,
                 status = status,
-                completedValue = log?.completedValue ?: 0f,
+                completedValue = if (habit.type == HabitType.WEEKLY) accumulatedValue else (log?.completedValue
+                    ?: 0f),
                 targetValue = habit.targetValue,
                 isToday = date == today,
                 completionMode = habit.completionMode

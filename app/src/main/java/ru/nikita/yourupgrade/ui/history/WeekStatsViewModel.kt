@@ -103,6 +103,10 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
 
         val logsByDate = weekLogs.groupBy { it.date }
 
+        // 🆕 Выносим выше — понадобится для фильтрации dayPoints
+        val dailyHabitsIds = allHabits.filter { it.type == HabitType.DAILY }.map { it.id }.toSet()
+        val weeklyHabitsIds = allHabits.filter { it.type == HabitType.WEEKLY }.map { it.id }.toSet()
+
         // Строим статистику по дням
         val dayNames = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
         val days = (0..6).map { index ->
@@ -113,7 +117,11 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
             Log.d("MyLog", "--- День: $dateStr, логов: ${dayLogs.size} ---")
 
             // Считаем баллы за день (включая штрафы)
-            val dayPoints = dayLogs.sumOf { it.earnedPoints.toDouble() }.toFloat()
+            // 🆕 Считаем баллы за день ТОЛЬКО для ежедневных привычек
+            val dayPoints = dayLogs
+                .filter { it.habitId in dailyHabitsIds }
+                .sumOf { it.earnedPoints.toDouble() }
+                .toFloat()
 
             // Статус каждой привычки
             val habitStatuses = dailyHabits.map { habit ->
@@ -160,8 +168,8 @@ class WeekStatsViewModel(application: Application) : AndroidViewModel(applicatio
             )
         }
 
-        val dailyHabitsIds = allHabits.filter { it.type == HabitType.DAILY }.map { it.id }.toSet()
-        val weeklyHabitsIds = allHabits.filter { it.type == HabitType.WEEKLY }.map { it.id }.toSet()
+//        val dailyHabitsIds = allHabits.filter { it.type == HabitType.DAILY }.map { it.id }.toSet()
+//        val weeklyHabitsIds = allHabits.filter { it.type == HabitType.WEEKLY }.map { it.id }.toSet()
 
         var dailyPoints = 0f
         var weeklyPoints = 0f

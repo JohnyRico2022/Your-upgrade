@@ -5,6 +5,7 @@ import android.view.GestureDetector
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
@@ -78,7 +79,11 @@ class HabitDetailFragment : Fragment() {
     private fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                combine(viewModel.habit, viewModel.weekLogs, viewModel.weekOffset) { habit, logs, offset ->
+                combine(
+                    viewModel.habit,
+                    viewModel.weekLogs,
+                    viewModel.weekOffset
+                ) { habit, logs, offset ->
                     if (habit != null) {
                         /** Заголовок */
                         binding.tvHabitName.text = habit.name
@@ -111,7 +116,6 @@ class HabitDetailFragment : Fragment() {
                         /** Заголовок недели */
                         binding.tvWeekTitle.text = viewModel.getWeekTitle()
 
-
                         /** Блокировка кнопки вперёд на текущей неделе */
                         val isCurrentWeek = offset == 0
                         binding.arrowRight.isEnabled = !isCurrentWeek
@@ -136,6 +140,9 @@ class HabitDetailFragment : Fragment() {
                             doneCount,
                             totalDays
                         )
+
+                        if (habit.type == HabitType.WEEKLY)
+                            binding.tvWeekSummary.visibility = GONE
                     }
                 }.collect { }
             }
@@ -145,7 +152,7 @@ class HabitDetailFragment : Fragment() {
     private fun showHabitMenu() {
         val popup = PopupMenu(requireContext(), binding.btnMenu)
         popup.menu.add(0, 1, 0, getString(R.string.habit_detail_menu_rename))
-      //  popup.menu.add(0, 2, 1, getString(R.string.habit_detail_menu_delete))
+        //  popup.menu.add(0, 2, 1, getString(R.string.habit_detail_menu_delete))
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
@@ -155,11 +162,11 @@ class HabitDetailFragment : Fragment() {
                     true
                 }
 
-              /*  2 -> {
-                    //todo  В будущие релизы
-                    Toast.makeText(requireContext(), "Скоро будет", Toast.LENGTH_SHORT).show()
-                    true
-                }*/
+                /*  2 -> {
+                      //todo  В будущие релизы
+                      Toast.makeText(requireContext(), "Скоро будет", Toast.LENGTH_SHORT).show()
+                      true
+                  }*/
 
                 else -> false
             }
